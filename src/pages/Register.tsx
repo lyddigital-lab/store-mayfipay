@@ -62,7 +62,7 @@ export default function Register() {
 
       await supabase.from('portefeuilles').upsert({ user_id: newUser.id, solde_disponible: 0, solde_coffre_fort: 0 }, { onConflict: 'user_id', ignoreDuplicates: true });
 
-      localStorage.setItem('store_acheteur_user', JSON.stringify({ id: newUser.id, nom: newUser.nom, tel: newUser.tel, role: newUser.role, pays: country.name }));
+      localStorage.setItem('store_acheteur_user', JSON.stringify({ id: newUser.id, nom: newUser.nom, tel: newUser.tel, role: 'acheteur', pays: country.name }));
       navigate(redirect, { replace: true });
     } catch (err: any) {
       setError(err.message || 'Erreur');
