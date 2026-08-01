@@ -40,7 +40,7 @@ export default function VendeurDashboard() {
 
   function handleSwitchAcheteur() {
     setSwitching(true);
-    setTimeout(() => navigate('/mon-compte'), 600);
+    setTimeout(() => navigate('/mon-compte'), 3000);
   }
 
   if (loading) return <div className="p-8">Chargement...</div>;

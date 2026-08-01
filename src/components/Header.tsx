@@ -38,6 +38,14 @@ export default function Header() {
                       <p className="font-semibold text-sm text-gray-900">{session.nom}</p>
                       <p className="text-xs text-gray-400">+{session.tel}</p>
                     </div>
+                    <Link
+                      to="/mon-compte"
+                      onClick={() => setShowMenu(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <User className="w-4 h-4 text-mayfipay-orange" />
+                      Mon compte
+                    </Link>
                     {session.role === 'vendeur' && (
                       <Link
                         to="/vendeur"

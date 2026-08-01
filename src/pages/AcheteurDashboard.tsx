@@ -73,7 +73,7 @@ export default function AcheteurDashboard() {
       } else {
         navigate('/vendeur/login');
       }
-    }, 600);
+    }, 3000);
   }
 
   function handleLogout() {
