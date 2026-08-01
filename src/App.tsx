@@ -5,6 +5,8 @@ import BoutiqueDetail from './pages/BoutiqueDetail';
 import ProduitDetail from './pages/ProduitDetail';
 import Paiement from './pages/Paiement';
 import Succes from './pages/Succes';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import VendeurLayout from './pages/Vendeur/Layout';
 import VendeurLogin from './pages/Vendeur/Login';
 import VendeurRegister from './pages/Vendeur/Register';
@@ -27,6 +29,8 @@ function App() {
           <Route path="produit/:produitId" element={<ProduitDetail />} />
           <Route path="paiement" element={<Paiement />} />
           <Route path="succes" element={<Succes />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
         </Route>
 
         {/* Espace vendeur */}

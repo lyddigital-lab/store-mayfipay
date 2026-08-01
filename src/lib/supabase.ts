@@ -35,6 +35,31 @@ export function clearVendeurSession(): void {
   localStorage.removeItem('store_vendeur_user');
 }
 
+// ─── Session acheteur ───────────────────────────────────────
+
+export interface AcheteurSession {
+  id: string;
+  nom: string;
+  tel: string;
+  role: string;
+}
+
+export function getAcheteurSession(): AcheteurSession | null {
+  const raw = localStorage.getItem('store_acheteur_user');
+  if (!raw) return null;
+  try {
+    const user = JSON.parse(raw);
+    if (user && user.id) return user;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearAcheteurSession(): void {
+  localStorage.removeItem('store_acheteur_user');
+}
+
 export async function hashPassword(password: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
