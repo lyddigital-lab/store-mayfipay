@@ -155,7 +155,10 @@ export default function Paiement() {
               <p className="font-semibold text-mayfipay-text text-sm">{session.nom}</p>
               <p className="text-xs text-mayfipay-text-sec">+{session.tel}</p>
             </div>
-            <button type="button" onClick={() => navigate('/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search))}
+            <button type="button" onClick={() => {
+              localStorage.removeItem('store_acheteur_user');
+              navigate('/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search));
+            }}
               className="ml-auto text-xs text-mayfipay-orange hover:underline">
               Changer de compte
             </button>
