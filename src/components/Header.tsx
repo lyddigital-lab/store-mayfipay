@@ -1,7 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Store } from 'lucide-react';
+import { Store, User, LogOut } from 'lucide-react';
+import { getAcheteurSession, clearAcheteurSession } from '../lib/supabase';
+import { useState } from 'react';
 
 export default function Header() {
+  const session = getAcheteurSession();
+  const [showMenu, setShowMenu] = useState(false);
+
   return (
     <header className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 py-4">
@@ -14,12 +19,58 @@ export default function Header() {
               MAYFIPAY <span className="font-normal">STORE</span>
             </span>
           </Link>
-          <Link
-            to="/vendeur/login"
-            className="text-sm font-medium text-mayfipay-orange hover:text-orange-600"
-          >
-            Vendeur
-          </Link>
+
+          <div className="flex items-center gap-3">
+            {session ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-50 text-mayfipay-orange text-sm font-medium hover:bg-orange-100"
+                >
+                  <div className="w-6 h-6 rounded-full bg-mayfipay-orange text-white flex items-center justify-center text-xs font-bold shrink-0">
+                    {session.nom.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="hidden sm:block">{session.nom.split(' ')[0]}</span>
+                </button>
+                {showMenu && (
+                  <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 w-52 py-1">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="font-semibold text-sm text-gray-900">{session.nom}</p>
+                      <p className="text-xs text-gray-400">+{session.tel}</p>
+                    </div>
+                    {session.role === 'vendeur' && (
+                      <Link
+                        to="/vendeur"
+                        onClick={() => setShowMenu(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        <Store className="w-4 h-4 text-mayfipay-orange" />
+                        Espace vendeur
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => { clearAcheteurSession(); setShowMenu(false); window.location.reload(); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Déconnexion
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link to="/login" className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-mayfipay-orange">
+                <User className="w-4 h-4" />
+                <span className="hidden sm:block">Connexion</span>
+              </Link>
+            )}
+            <Link
+              to="/vendeur/login"
+              className="text-sm font-medium text-mayfipay-orange hover:text-orange-600"
+            >
+              Vendeur
+            </Link>
+          </div>
         </div>
         <input
           type="text"

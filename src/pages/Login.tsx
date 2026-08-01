@@ -57,9 +57,8 @@ export default function Login() {
 
       if (queryError || !user) throw new Error('Numéro ou mot de passe incorrect');
 
-      // Un vendeur peut aussi acheter — on lui assigne le rôle "acheteur" dans cette session
       localStorage.setItem('store_acheteur_user', JSON.stringify({
-        id: user.id, nom: user.nom, tel: user.tel, role: 'acheteur', pays: user.pays,
+        id: user.id, nom: user.nom, tel: user.tel, role: user.role, pays: user.pays,
       }));
 
       navigate(redirect, { replace: true });
