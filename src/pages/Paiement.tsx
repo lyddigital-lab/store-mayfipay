@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { supabase, getProduitDetail, checkDisponibiliteVille, getAcheteurSession } from '../lib/supabase';
+import { getProduitDetail, checkDisponibiliteVille, getAcheteurSession } from '../lib/supabase';
 import { formatPrix } from '../utils/helpers';
 import type { Produit, ExpeditionInfo } from '../types';
 import { Shield, Lock } from 'lucide-react';
@@ -73,40 +73,43 @@ export default function Paiement() {
       const adresse = `${quartier ? quartier + ', ' : ''}${selectedVille}`;
       const phone = '+' + session.tel;
 
-      const { data, error: fnError } = await supabase.functions.invoke('moneroo-payment', {
-        body: {
-          action: 'initialize',
-          data: {
-            montant: total,
-            description: `Achat: ${produit.nom}`,
-            customer: {
-              email: `${session.tel}@mayfipay.app`,
-              first_name: session.nom.split(' ')[0] || 'Client',
-              last_name: session.nom.split(' ').slice(1).join(' ') || 'MayfiPay',
-              phone: phone,
-            },
-            methods: ['mtn_cg', 'airtel_cg'],
-            metadata: {
-              produit_id: produit.id,
-              vendeur_id: produit.vendeur_id,
-              acheteur_id: session.id,
-              acheteur_nom: session.nom,
-              acheteur_tel: session.tel,
-              adresse_livraison: adresse,
-              prix_produit: produit.prix,
-              frais_acheteur: fraisAcheteur,
-              frais_expedition: fraisExpedition,
-              source: 'store',
-            },
-            return_url: `${window.location.origin}/succes`,
-          },
+      const MAYFIPAY_API_KEY = import.meta.env.VITE_MAYFIPAY_API_KEY;
+
+      const res = await fetch('https://api.mayfipay.com/v1/payments', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${MAYFIPAY_API_KEY}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          amount: total,
+          currency: 'XAF',
+          external_id: `store_${session.id}_${produit.id}_${Date.now()}`,
+          description: `Achat: ${produit.nom}`,
+          customer: {
+            phone: phone,
+            name: session.nom,
+          },
+          return_url: `${window.location.origin}/succes`,
+          metadata: {
+            produit_id: produit.id,
+            vendeur_id: produit.vendeur_id,
+            acheteur_id: session.id,
+            acheteur_nom: session.nom,
+            acheteur_tel: session.tel,
+            adresse_livraison: adresse,
+            prix_produit: produit.prix,
+            frais_acheteur: fraisAcheteur,
+            frais_expedition: fraisExpedition,
+            source: 'store',
+          },
+        }),
       });
 
-      if (fnError) throw new Error(fnError.message);
+      const data = await res.json();
       if (!data?.success) throw new Error(data?.error || 'Erreur lors du paiement');
 
-      const checkoutUrl = data?.data?.data?.checkout_url;
+      const checkoutUrl = data?.data?.checkout_url;
       if (!checkoutUrl) throw new Error('Lien de paiement non reçu');
 
       window.location.href = checkoutUrl;
