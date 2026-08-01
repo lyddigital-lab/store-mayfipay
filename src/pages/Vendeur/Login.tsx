@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase, hashPassword, getVendeurSession } from '../../lib/supabase';
-import { Store } from 'lucide-react';
 
 const COUNTRIES = [
   { code: '242', name: 'Congo Brazzaville', flag: '\u{1F1E8}\u{1F1EC}', placeholder: '06 XXX XX XX' },
@@ -9,7 +8,17 @@ const COUNTRIES = [
   { code: '237', name: 'Cameroun', flag: '\u{1F1E8}\u{1F1F2}', placeholder: '6X XXX XX XX' },
   { code: '225', name: "Côte d'Ivoire", flag: '\u{1F1E8}\u{1F1EE}', placeholder: '07 XXX XX XX' },
   { code: '221', name: 'Sénégal', flag: '\u{1F1F8}\u{1F1F3}', placeholder: '7X XXX XX XX' },
+  { code: '229', name: 'Bénin', flag: '\u{1F1E7}\u{1F1EF}', placeholder: '9X XXX XXX' },
+  { code: '226', name: 'Burkina Faso', flag: '\u{1F1E7}\u{1F1EB}', placeholder: '7X XX XX XX' },
   { code: '241', name: 'Gabon', flag: '\u{1F1EC}\u{1F1E6}', placeholder: '0X XX XX XX' },
+  { code: '233', name: 'Ghana', flag: '\u{1F1EC}\u{1F1ED}', placeholder: '2X XXX XXXX' },
+  { code: '254', name: 'Kenya', flag: '\u{1F1F0}\u{1F1EA}', placeholder: '7XX XXX XXX' },
+  { code: '256', name: 'Ouganda', flag: '\u{1F1FA}\u{1F1EC}', placeholder: '7XX XXX XXX' },
+  { code: '255', name: 'Tanzanie', flag: '\u{1F1F9}\u{1F1FF}', placeholder: '7XX XXX XXX' },
+  { code: '250', name: 'Rwanda', flag: '\u{1F1F7}\u{1F1FC}', placeholder: '7X XXX XXXX' },
+  { code: '260', name: 'Zambie', flag: '\u{1F1FF}\u{1F1F2}', placeholder: '9X XXX XXXX' },
+  { code: '265', name: 'Malawi', flag: '\u{1F1F2}\u{1F1FC}', placeholder: '9XX XXX XXX' },
+  { code: '234', name: 'Nigeria', flag: '\u{1F1F3}\u{1F1EC}', placeholder: '80X XXX XXXX' },
 ];
 
 export default function VendeurLogin() {
@@ -79,9 +88,9 @@ export default function VendeurLogin() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-3">
-            <Store className="h-8 w-8 text-orange-500" />
+            <span className="text-2xl font-black text-orange-500">M</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">MayfiPay Store</h1>
+          <h1 className="text-2xl font-bold text-white">MayfiPay</h1>
           <p className="text-white/80 text-sm mt-1">Espace vendeur</p>
         </div>
 
@@ -163,7 +172,10 @@ export default function VendeurLogin() {
         </div>
 
         <p className="text-center text-white/70 text-xs mt-6">
-          Pas encore vendeur ? Créez un compte sur l'app MayfiPay
+          Pas encore de compte ?{' '}
+          <Link to="/vendeur/register" className="text-white font-semibold underline">
+            Créer un compte MayfiPay
+          </Link>
         </p>
       </div>
     </div>

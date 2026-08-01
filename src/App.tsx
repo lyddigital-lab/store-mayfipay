@@ -7,6 +7,7 @@ import Paiement from './pages/Paiement';
 import Succes from './pages/Succes';
 import VendeurLayout from './pages/Vendeur/Layout';
 import VendeurLogin from './pages/Vendeur/Login';
+import VendeurRegister from './pages/Vendeur/Register';
 import VendeurDashboard from './pages/Vendeur/Dashboard';
 import VendeurParametres from './pages/Vendeur/Parametres';
 import VendeurProduits from './pages/Vendeur/Produits';
@@ -30,6 +31,7 @@ function App() {
 
         {/* Espace vendeur */}
         <Route path="/vendeur/login" element={<VendeurLogin />} />
+        <Route path="/vendeur/register" element={<VendeurRegister />} />
         <Route path="/vendeur" element={<VendeurLayout />}>
           <Route index element={<VendeurDashboard />} />
           <Route path="parametres" element={<VendeurParametres />} />
