@@ -87,8 +87,8 @@ export default function VendeurLogin() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white rounded-2xl shadow-lg mb-3">
-            <span className="text-2xl font-black text-orange-500">M</span>
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-lg mb-3 p-2">
+            <img src="/logo.png" alt="MayfiPay" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-white">MayfiPay</h1>
           <p className="text-white/80 text-sm mt-1">Espace vendeur</p>
