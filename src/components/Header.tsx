@@ -30,7 +30,7 @@ export default function Header() {
                   <div className="w-6 h-6 rounded-full bg-mayfipay-orange text-white flex items-center justify-center text-xs font-bold shrink-0">
                     {session.nom.charAt(0).toUpperCase()}
                   </div>
-                  <span className="hidden sm:block">{session.nom.split(' ')[0]}</span>
+                  <span className="hidden sm:block text-sm">{session.nom.split(' ')[0]}</span>
                 </button>
                 {showMenu && (
                   <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 w-52 py-1">

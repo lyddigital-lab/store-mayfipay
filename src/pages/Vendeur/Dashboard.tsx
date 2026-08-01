@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getVendeurSession, getBoutiqueByVendeur, getCommandesByVendeur } from '../../lib/supabase';
 import { formatPrix, getStatutLabel, getStatutColor } from '../../utils/helpers';
+import { ShoppingBag, ArrowLeft } from 'lucide-react';
 import type { Boutique, Commande } from '../../types';
 
 export default function VendeurDashboard() {
+  const navigate = useNavigate();
   const [boutique, setBoutique] = useState<Boutique | null>(null);
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
+  const [switching, setSwitching] = useState(false);
+
+  const session = getVendeurSession();
 
   useEffect(() => {
     loadData();
@@ -32,11 +38,42 @@ export default function VendeurDashboard() {
   const totalVentes = commandes.filter(c => c.statut === 'livree').reduce((sum, c) => sum + c.montant_net, 0);
   const totalCommandes = commandes.length;
 
+  function handleSwitchAcheteur() {
+    setSwitching(true);
+    setTimeout(() => navigate('/mon-compte'), 600);
+  }
+
   if (loading) return <div className="p-8">Chargement...</div>;
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-mayfipay-text mb-6">Tableau de bord</h1>
+      {/* Switch animation */}
+      {switching && (
+        <div className="fixed inset-0 bg-mayfipay-orange/90 z-50 flex items-center justify-center">
+          <div className="text-center text-white">
+            <div className="flex items-center justify-center gap-4 text-2xl font-bold mb-2">
+              <span>Vendeur</span>
+              <ArrowLeft className="w-8 h-8 animate-bounce" />
+              <span>Acheteur</span>
+            </div>
+            <p className="text-white/80 text-sm">Changement de mode...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Bienvenue + switch */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <p className="text-sm text-mayfipay-text-sec">Bonjour {session?.nom?.split(' ')[0]} 👋</p>
+          <h1 className="text-2xl font-bold text-mayfipay-text">Tableau de bord</h1>
+          <p className="text-xs text-mayfipay-text-muted mt-0.5">Vous êtes en mode <strong>Vendeur</strong></p>
+        </div>
+        <button onClick={handleSwitchAcheteur}
+          className="flex items-center gap-2 px-3 py-2 bg-orange-50 text-mayfipay-orange text-sm font-medium rounded-xl hover:bg-orange-100 transition border border-orange-200">
+          <ShoppingBag className="w-4 h-4" />
+          Mode Acheteur
+        </button>
+      </div>
       {!boutique ? (
         <div className="rounded-lg border border-mayfipay-border bg-white p-6 text-center">
           <p className="text-mayfipay-text-sec mb-2">Vous n'avez pas encore de boutique.</p>
