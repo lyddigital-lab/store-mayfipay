@@ -84,6 +84,21 @@ export default function Login() {
           <h2 className="text-lg font-bold text-gray-900 mb-1">Connexion</h2>
           <p className="text-sm text-gray-500 mb-5">Connectez-vous avec votre compte MayfiPay</p>
 
+          {/* Connexion avec MayfiPay (SSO) */}
+          <a
+            href={`https://app.mayfipay.com/login?redirect=${encodeURIComponent(window.location.origin + '/sso')}&source=store`}
+            className="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl font-bold bg-gray-900 text-white hover:bg-gray-800 transition mb-4"
+          >
+            <span className="w-6 h-6 bg-orange-500 rounded-lg flex items-center justify-center text-white text-xs font-black">M</span>
+            Se connecter avec MayfiPay
+          </a>
+
+          <div className="flex items-center gap-3 mb-5">
+            <div className="flex-1 h-px bg-gray-200"></div>
+            <span className="text-xs text-gray-400 font-medium">OU</span>
+            <div className="flex-1 h-px bg-gray-200"></div>
+          </div>
+
           {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">{error}</div>}
 
           <form onSubmit={handleLogin} className="space-y-4">
