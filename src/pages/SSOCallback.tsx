@@ -24,17 +24,30 @@ export default function SSOCallback() {
         return;
       }
 
-      // Créer la session acheteur dans le store
-      localStorage.setItem('store_acheteur_user', JSON.stringify({
-        id: userData.id,
-        nom: userData.nom,
-        tel: userData.tel,
-        role: userData.role || 'acheteur',
-        pays: userData.pays || '',
-      }));
+      const role = userData.role || 'acheteur';
 
-      // Rediriger vers la page demandée
-      navigate(redirect, { replace: true });
+      // Créer la session dans le store selon le rôle
+      if (role === 'vendeur') {
+        localStorage.setItem('store_vendeur_user', JSON.stringify({
+          id: userData.id,
+          nom: userData.nom,
+          tel: userData.tel,
+          role: 'vendeur',
+          pays: userData.pays || '',
+        }));
+        localStorage.removeItem('store_acheteur_user');
+        navigate(redirect === '/' ? '/vendeur' : redirect, { replace: true });
+      } else {
+        localStorage.setItem('store_acheteur_user', JSON.stringify({
+          id: userData.id,
+          nom: userData.nom,
+          tel: userData.tel,
+          role: 'acheteur',
+          pays: userData.pays || '',
+        }));
+        localStorage.removeItem('store_vendeur_user');
+        navigate(redirect, { replace: true });
+      }
     } catch (e) {
       setError('Erreur lors de la lecture de la session');
       console.error('SSO parse error:', e);
