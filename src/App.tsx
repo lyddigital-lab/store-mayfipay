@@ -7,6 +7,7 @@ import Paiement from './pages/Paiement';
 import Succes from './pages/Succes';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import SSOCallback from './pages/SSOCallback';
 import AcheteurDashboard from './pages/AcheteurDashboard';
 import VendeurLayout from './pages/Vendeur/Layout';
 import VendeurLogin from './pages/Vendeur/Login';
@@ -32,6 +33,7 @@ function App() {
           <Route path="succes" element={<Succes />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="sso" element={<SSOCallback />} />
           <Route path="mon-compte" element={<AcheteurDashboard />} />
         </Route>
 
