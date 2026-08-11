@@ -50,7 +50,7 @@ export function getAcheteurSession(): AcheteurSession | null {
   try {
     const user = JSON.parse(raw);
     // Rejeter les sessions vendeur qui auraient atterri ici par erreur
-    if (user && user.id) return user;
+    if (user && user.id && user.role !== 'vendeur') return user;
     return null;
   } catch {
     return null;
