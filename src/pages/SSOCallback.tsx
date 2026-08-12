@@ -36,7 +36,6 @@ export default function SSOCallback() {
           pays: userData.pays || '',
         }));
         localStorage.removeItem('store_acheteur_user');
-        navigate(redirect === '/' ? '/vendeur' : redirect, { replace: true });
       } else {
         localStorage.setItem('store_acheteur_user', JSON.stringify({
           id: userData.id,
@@ -46,8 +45,11 @@ export default function SSOCallback() {
           pays: userData.pays || '',
         }));
         localStorage.removeItem('store_vendeur_user');
-        navigate(redirect, { replace: true });
       }
+
+      // Redirection automatique après 3 secondes
+      const target = role === 'vendeur' ? (redirect === '/' ? '/vendeur' : redirect) : redirect;
+      setTimeout(() => navigate(target, { replace: true }), 3000);
     } catch (e) {
       setError('Erreur lors de la lecture de la session');
       console.error('SSO parse error:', e);
@@ -74,14 +76,45 @@ export default function SSOCallback() {
     );
   }
 
+  // Écran de transition : Logo MayfiPay → Sync verte animée → Logo Store
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl p-8 shadow-lg max-w-md w-full text-center">
-        <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
+        {/* Les 3 éléments alignés horizontalement */}
+        <div className="flex items-center justify-center gap-4 mb-8">
+          {/* Logo MayfiPay (gauche) */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-14 h-14 rounded-2xl bg-gray-900 flex items-center justify-center shadow-lg">
+              <span className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white font-black text-sm">M</span>
+            </div>
+            <span className="text-xs font-semibold text-gray-600">MayfiPay</span>
+          </div>
+
+          {/* Trait fin + icône sync */}
+          <div className="flex items-center">
+            <div className="w-8 h-px bg-gray-200"></div>
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mx-1">
+              <svg className="w-5 h-5 text-green-600 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M21 12a9 9 0 1 1-2.64-6.36" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div className="w-8 h-px bg-gray-200"></div>
+          </div>
+
+          {/* Logo Store (droite) */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-14 h-14 rounded-2xl bg-orange-500 flex items-center justify-center shadow-lg">
+              <span className="text-white font-black text-sm">S</span>
+            </div>
+            <span className="text-xs font-semibold text-gray-600">Store</span>
+          </div>
         </div>
-        <h1 className="text-xl font-bold text-gray-900 mb-2">Connexion en cours...</h1>
-        <p className="text-gray-500">Authentification avec MayfiPay</p>
+
+        <p className="text-center text-gray-600 text-base leading-relaxed">
+          Vous êtes en train de vous connecter au Store avec votre compte MayfiPay.
+          <br />
+          Cette connexion est automatique.
+        </p>
       </div>
     </div>
   );
