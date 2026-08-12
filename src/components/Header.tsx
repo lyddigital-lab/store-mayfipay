@@ -72,12 +72,6 @@ export default function Header() {
                 <span className="hidden sm:block">Connexion</span>
               </Link>
             )}
-            <Link
-              to="/vendeur/login"
-              className="text-sm font-medium text-mayfipay-orange hover:text-orange-600"
-            >
-              Vendeur
-            </Link>
           </div>
         </div>
         <input
