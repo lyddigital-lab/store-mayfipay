@@ -67,19 +67,21 @@ export default function ProduitDetail() {
   function handleAcheter() {
     if (!produit) return;
     
-    // Si ville sélectionnée, rediriger vers page paiement avec ville pré-remplie
+    // Si ville sélectionnée et disponible, rediriger vers page paiement avec ville pré-remplie
     if (selectedVille && expeditionInfo?.disponible) {
       navigate(`/paiement?produit_id=${produit.id}&ville=${encodeURIComponent(selectedVille)}`);
       return;
     }
 
-    // Sinon, comportement classique (lien unique)
+    // Si le produit a un lien unique dans l'app MayfiPay
     const lienUnique = produit.lien_unique;
     if (lienUnique) {
       window.location.href = `https://app.mayfipay.com/p/${lienUnique}`;
-    } else {
-      alert('Veuillez sélectionner votre ville de livraison.');
+      return;
     }
+
+    // Sinon redirection vers la page de paiement générique
+    navigate(`/paiement?produit_id=${produit.id}`);
   }
 
   function handleContact() {

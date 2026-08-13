@@ -1,17 +1,40 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Store, User, LogOut } from 'lucide-react';
-import { getAcheteurSession, clearAcheteurSession } from '../lib/supabase';
 import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { Store, User, LogOut, Search, X } from 'lucide-react';
+import { getAcheteurSession, clearAcheteurSession } from '../lib/supabase';
 
 export default function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showMenu, setShowMenu] = useState(false);
   const [session, setSession] = useState(() => getAcheteurSession());
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
-  // Resynchroniser la session à chaque changement de route (retour SSO, déconnexion…)
+  useEffect(() => {
+    setSearchQuery(searchParams.get('q') || '');
+  }, [searchParams]);
+
   useEffect(() => {
     setSession(getAcheteurSession());
   }, [location.pathname]);
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const query = searchQuery.trim();
+    if (query) {
+      navigate(`/?q=${encodeURIComponent(query)}`);
+    } else {
+      navigate('/');
+    }
+  }
+
+  function handleClearSearch() {
+    setSearchQuery('');
+    if (searchParams.get('q')) {
+      navigate('/');
+    }
+  }
 
   return (
     <header className="bg-white border-b border-gray-200">
@@ -91,11 +114,27 @@ export default function Header() {
             )}
           </div>
         </div>
-        <input
-          type="text"
-          placeholder="Rechercher..."
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:border-gray-900 text-sm"
-        />
+        {/* Barre de recherche connectée */}
+        <form onSubmit={handleSearch} className="relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Rechercher un produit, une catégorie..."
+            className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:border-mayfipay-orange focus:ring-1 focus:ring-mayfipay-orange text-sm transition-all"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+              title="Effacer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </form>
       </div>
     </header>
   );

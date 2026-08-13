@@ -466,6 +466,8 @@ export async function creerCommande(data: {
 }) {
   // Générer un code de commande
   const code = 'STR' + Date.now().toString(36).toUpperCase();
+  const commission = Math.round(data.montant * 0.035);
+  const montant_net = data.montant - commission;
 
   const { data: commande, error } = await supabase
     .from('commandes')
@@ -475,8 +477,8 @@ export async function creerCommande(data: {
       acheteur_id: data.acheteur_id,
       vendeur_id: data.vendeur_id,
       montant: data.montant,
-      commission: Math.round(data.montant * 0.035),
-      montant_net: Math.floor(data.montant * 0.97),
+      commission,
+      montant_net,
       statut: 'en_attente_paiement',
       adresse_livraison: data.adresse_livraison,
     })
