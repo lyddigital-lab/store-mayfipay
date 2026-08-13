@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Store, User, LogOut, Search, X } from 'lucide-react';
-import { getAcheteurSession, clearAcheteurSession, getVendeurSession } from '../lib/supabase';
+import { getAcheteurSession, clearAcheteurSession, getVendeurSession, clearVendeurSession } from '../lib/supabase';
 
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [showMenu, setShowMenu] = useState(false);
-  const [session, setSession] = useState(() => getAcheteurSession());
+  const [acheteurSession, setAcheteurSession] = useState(() => getAcheteurSession());
   const [vendeurSession, setVendeurSession] = useState(() => getVendeurSession());
+  const displaySession = acheteurSession || vendeurSession;
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
   useEffect(() => {
@@ -17,7 +18,7 @@ export default function Header() {
   }, [searchParams]);
 
   useEffect(() => {
-    setSession(getAcheteurSession());
+    setAcheteurSession(getAcheteurSession());
     setVendeurSession(getVendeurSession());
   }, [location.pathname]);
 
@@ -52,31 +53,32 @@ export default function Header() {
           </Link>
 
           <div className="flex items-center gap-3">
-            {session ? (
+            {displaySession ? (
               <div className="relative">
                 <button
                   onClick={() => setShowMenu(!showMenu)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-50 text-mayfipay-orange text-sm font-medium hover:bg-orange-100"
                 >
-                  {session.photo ? (
+                  {displaySession.photo ? (
                     <img
-                      src={session.photo}
-                      alt={session.nom}
+                      src={displaySession.photo}
+                      alt={displaySession.nom}
                       className="w-6 h-6 rounded-full object-cover shrink-0"
                     />
                   ) : (
                     <div className="w-6 h-6 rounded-full bg-mayfipay-orange text-white flex items-center justify-center text-xs font-bold shrink-0">
-                      {session.nom.charAt(0).toUpperCase()}
+                      {displaySession.nom.charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <span className="hidden sm:block text-sm">{session.nom.split(' ')[0]}</span>
+                  <span className="hidden sm:block text-sm">{displaySession.nom.split(' ')[0]}</span>
                 </button>
                 {showMenu && (
                   <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 w-52 py-1">
                     <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="font-semibold text-sm text-gray-900">{session.nom}</p>
-                      <p className="text-xs text-gray-400">+{session.tel}</p>
+                      <p className="font-semibold text-sm text-gray-900">{displaySession.nom}</p>
+                      <p className="text-xs text-gray-400">+{displaySession.tel}</p>
                     </div>
+                    {acheteurSession && (
                     <Link
                       to="/mon-compte"
                       onClick={() => setShowMenu(false)}
@@ -85,6 +87,7 @@ export default function Header() {
                       <User className="w-4 h-4 text-mayfipay-orange" />
                       Mon compte
                     </Link>
+                    )}
                     {vendeurSession && (
                       <Link
                         to="/vendeur"
@@ -96,7 +99,7 @@ export default function Header() {
                       </Link>
                     )}
                     <button
-                      onClick={() => { clearAcheteurSession(); setShowMenu(false); window.location.reload(); }}
+                      onClick={() => { clearAcheteurSession(); clearVendeurSession(); setShowMenu(false); window.location.reload(); }}
                       className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
                     >
                       <LogOut className="w-4 h-4" />
