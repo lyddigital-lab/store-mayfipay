@@ -7,6 +7,7 @@ import ProduitDetail from './pages/ProduitDetail';
 import Paiement from './pages/Paiement';
 import Succes from './pages/Succes';
 import Login from './pages/Login';
+import DevenirVendeur from './pages/DevenirVendeur';
 import SSOCallback from './pages/SSOCallback';
 import AcheteurDashboard from './pages/AcheteurDashboard';
 import VendeurLayout from './pages/Vendeur/Layout';
@@ -25,6 +26,8 @@ function App() {
         <Route path="/login" element={<LoginLayout />}>
           <Route index element={<Login />} />
         </Route>
+
+        <Route path="/devenir-vendeur" element={<DevenirVendeur />} />
 
         {/* Main store — standard layout */}
         <Route path="/" element={<Layout />}>

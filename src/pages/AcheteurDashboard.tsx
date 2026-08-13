@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase, getAcheteurSession, clearAcheteurSession, getVendeurSession } from '../lib/supabase';
+import { persistVendeurSession } from '../lib/session';
+import { getKycStatus } from '../lib/kyc';
 import { ShoppingBag, Package, Smartphone, ArrowRight, LogOut, Store } from 'lucide-react';
 
 interface Commande {
@@ -27,10 +29,12 @@ export default function AcheteurDashboard() {
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
   const [switching, setSwitching] = useState(false);
+  const [kycVerified, setKycVerified] = useState(false);
 
   useEffect(() => {
     if (!session) { navigate('/login?redirect=/mon-compte'); return; }
     loadCommandes();
+    getKycStatus(session.id).then(s => setKycVerified(s.etape === 'verified')).catch(() => {});
   }, []);
 
   async function loadCommandes() {
@@ -66,14 +70,15 @@ export default function AcheteurDashboard() {
   }
 
   function handleSwitch() {
+    let target = '/devenir-vendeur';
+    if (vendeurSession) {
+      target = '/vendeur';
+    } else if (kycVerified && session) {
+      persistVendeurSession({ id: session.id, nom: session.nom, tel: session.tel, role: 'vendeur' });
+      target = '/vendeur';
+    }
     setSwitching(true);
-    setTimeout(() => {
-      if (vendeurSession) {
-        navigate('/vendeur');
-      } else {
-        navigate('/login');
-      }
-    }, 3000);
+    setTimeout(() => navigate(target), 1200);
   }
 
   function handleLogout() {
@@ -122,7 +127,7 @@ export default function AcheteurDashboard() {
           <div className="flex items-center gap-2">
             <Store className="w-4 h-4" />
             <span className="text-sm font-medium">
-              {vendeurSession ? 'Passer en mode Vendeur' : 'Devenir vendeur'}
+              {vendeurSession ? 'Passer en mode Vendeur' : kycVerified ? 'KYC vérifié — Accéder à l’espace vendeur' : 'Devenir vendeur'}
             </span>
           </div>
           <ArrowRight className="w-4 h-4" />

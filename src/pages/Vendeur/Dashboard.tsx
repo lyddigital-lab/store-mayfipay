@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getVendeurSession, getBoutiqueByVendeur, getCommandesByVendeur } from '../../lib/supabase';
+import { persistAcheteurSession } from '../../lib/session';
 import { formatPrix, getStatutLabel, getStatutColor } from '../../utils/helpers';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';
 import type { Boutique, Commande } from '../../types';
@@ -39,8 +40,12 @@ export default function VendeurDashboard() {
   const totalCommandes = commandes.length;
 
   function handleSwitchAcheteur() {
+    const s = getVendeurSession();
+    if (s) {
+      persistAcheteurSession({ id: s.id, nom: s.nom, tel: s.tel, role: 'acheteur' });
+    }
     setSwitching(true);
-    setTimeout(() => navigate('/mon-compte'), 3000);
+    setTimeout(() => navigate('/'), 1500);
   }
 
   if (loading) return <div className="p-8">Chargement...</div>;

@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Truck, Settings, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Truck, Settings, LogOut, Menu, X, Home } from 'lucide-react';
 import { getVendeurSession, clearVendeurSession } from '../../lib/supabase';
 import { useEffect, useState } from 'react';
 
@@ -49,6 +49,12 @@ export default function VendeurLayout() {
           <h2 className="font-bold text-mayfipay-text">Espace vendeur</h2>
         </div>
         <nav className="p-2 space-y-1">
+          <NavLink 
+            to="/" 
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-mayfipay-text-sec hover:bg-mayfipay-orange-light hover:text-mayfipay-orange transition-colors"
+          >
+            <Home className="h-4 w-4" /> Accueil
+          </NavLink>
           <NavLink 
             to="/vendeur" 
             end 
