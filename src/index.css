@@ -1,20 +1,28 @@
 @import "tailwindcss";
 
 @theme {
-  --color-mayfipay-orange: #F59E0B;
+  /* Primary — MayfiPay Blue (deep) */
+  --color-mayfipay-blue: #0B88E5;
+  --color-mayfipay-blue-hover: #0967C2;
+  --color-mayfipay-blue-light: #EFF6FF;
+  --color-mayfipay-blue-lighter: #F0F9FF;
+
+  /* Accent — MayfiPay Orange (warm, small touches only) */
+  --color-mayfipay-orange: #F97216;
   --color-mayfipay-orange-light: #FFFBEB;
-  --color-mayfipay-orange-dark: #D97706;
-  --color-mayfipay-blue: #38BDF8;
-  --color-mayfipay-blue-light: #F0F9FF;
-  --color-mayfipay-blue-dark: #0284C7;
+  --color-mayfipay-orange-dark: #C2590A;
+
+  /* Neutrals */
   --color-mayfipay-success: #10B981;
   --color-mayfipay-danger: #EF4444;
   --color-mayfipay-text: #0F172A;
-  --color-mayfipay-text-sec: #64748B;
+  --color-mayfipay-text-sec: #475569;
   --color-mayfipay-text-muted: #94A3B8;
   --color-mayfipay-border: #E2E8F0;
-  --color-mayfipay-bg: #FAFAF8;
+  --color-mayfipay-border-light: #F1F5F9;
+  --color-mayfipay-bg: #FAFAFA;
   --color-mayfipay-card: #FFFFFF;
+  --color-mayfipay-overlay: #FCFCFC;
 }
 
 body {

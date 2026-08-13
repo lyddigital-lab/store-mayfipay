@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import LoginLayout from './components/LoginLayout';
 import Accueil from './pages/Accueil';
 import BoutiqueDetail from './pages/BoutiqueDetail';
 import ProduitDetail from './pages/ProduitDetail';
@@ -23,7 +24,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Pages publiques */}
+        {/* Auth / login pages — premium minimalist layout */}
+        <Route path="/login" element={<LoginLayout />}>
+          <Route index element={<Login />} />
+        </Route>
+
+        {/* Main store — standard layout */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Accueil />} />
           <Route path="boutique/:slug" element={<BoutiqueDetail />} />
@@ -31,7 +37,6 @@ function App() {
           <Route path="produit/:produitId" element={<ProduitDetail />} />
           <Route path="paiement" element={<Paiement />} />
           <Route path="succes" element={<Succes />} />
-          <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           <Route path="sso" element={<SSOCallback />} />
           <Route path="mon-compte" element={<AcheteurDashboard />} />
