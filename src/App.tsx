@@ -7,12 +7,9 @@ import ProduitDetail from './pages/ProduitDetail';
 import Paiement from './pages/Paiement';
 import Succes from './pages/Succes';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import SSOCallback from './pages/SSOCallback';
 import AcheteurDashboard from './pages/AcheteurDashboard';
 import VendeurLayout from './pages/Vendeur/Layout';
-import VendeurLogin from './pages/Vendeur/Login';
-import VendeurRegister from './pages/Vendeur/Register';
 import VendeurDashboard from './pages/Vendeur/Dashboard';
 import VendeurParametres from './pages/Vendeur/Parametres';
 import VendeurProduits from './pages/Vendeur/Produits';
@@ -37,14 +34,11 @@ function App() {
           <Route path="produit/:produitId" element={<ProduitDetail />} />
           <Route path="paiement" element={<Paiement />} />
           <Route path="succes" element={<Succes />} />
-          <Route path="register" element={<Register />} />
           <Route path="sso" element={<SSOCallback />} />
           <Route path="mon-compte" element={<AcheteurDashboard />} />
         </Route>
 
         {/* Espace vendeur */}
-        <Route path="/vendeur/login" element={<VendeurLogin />} />
-        <Route path="/vendeur/register" element={<VendeurRegister />} />
         <Route path="/vendeur" element={<VendeurLayout />}>
           <Route index element={<VendeurDashboard />} />
           <Route path="parametres" element={<VendeurParametres />} />
