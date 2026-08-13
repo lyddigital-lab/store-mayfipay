@@ -12,7 +12,7 @@ export default function VendeurLayout() {
   useEffect(() => {
     const session = getVendeurSession();
     if (!session) {
-      navigate('/vendeur/login');
+      navigate('/login');
     } else {
       setVendeur({ nom: session.nom });
       setLoading(false);
@@ -21,7 +21,7 @@ export default function VendeurLayout() {
 
   function handleLogout() {
     clearVendeurSession();
-    navigate('/vendeur/login');
+    navigate('/');
   }
 
   if (loading) return <div className="flex items-center justify-center min-h-screen">Chargement...</div>;

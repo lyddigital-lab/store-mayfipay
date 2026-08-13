@@ -29,7 +29,7 @@ export default function AcheteurDashboard() {
   const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
-    if (!session) { navigate('/login'); return; }
+    if (!session) { navigate('/login?redirect=/mon-compte'); return; }
     loadCommandes();
   }, []);
 
@@ -71,7 +71,7 @@ export default function AcheteurDashboard() {
       if (vendeurSession) {
         navigate('/vendeur');
       } else {
-        navigate('/vendeur/login');
+        navigate('/login');
       }
     }, 3000);
   }

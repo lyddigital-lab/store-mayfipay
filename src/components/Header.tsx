@@ -81,7 +81,10 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <Link to="/login" className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-mayfipay-orange">
+              <Link
+                to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
+                className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-mayfipay-orange"
+              >
                 <User className="w-4 h-4" />
                 <span className="hidden sm:block">Connexion</span>
               </Link>
