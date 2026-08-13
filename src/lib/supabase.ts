@@ -270,7 +270,7 @@ export function matchPaysCode(paysCode: string, paysName?: string): boolean {
 
 // ─── Update produit complet (categories, photos, villes_vente) ─
 
-export async function updateProduitComplet(id: string, data: Partial<Produit>): Promise<void> {
+export async function updateProduitComplet(id: string, data: Partial<Produit>, vendeurId: string): Promise<void> {
   const stock = data.stock ?? 0;
   const { error } = await supabase
     .from('produits')
@@ -286,8 +286,21 @@ export async function updateProduitComplet(id: string, data: Partial<Produit>): 
       description: data.description,
       visible_store: data.visible_store,
     })
-    .eq('id', id);
+    .eq('id', id)
+    .eq('vendeur_id', vendeurId);
   if (error) throw error;
+}
+
+// ─── Delete produit sécurisé (IDOR protégé) ─────────────
+
+export async function deleteProduit(id: string, vendeurId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('produits')
+    .delete()
+    .eq('id', id)
+    .eq('vendeur_id', vendeurId);
+  if (error) throw error;
+  return true;
 }
 
 // ─── Check disponibilite ville pour un produit ────────────

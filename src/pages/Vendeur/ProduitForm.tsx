@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
-import { getVendeurSession, supabase, updateProduitComplet, getBoutiqueByVendeur } from '../../lib/supabase';
+import { getVendeurSession, supabase, updateProduitComplet, deleteProduit, getBoutiqueByVendeur } from '../../lib/supabase';
 import PhotoUploader from '../../components/PhotoUploader';
 import VillesSelector from '../../components/VillesSelector';
 import type { VilleVente } from '../../types';
@@ -69,6 +69,7 @@ export default function VendeurProduitForm() {
         .from('produits')
         .select('*')
         .eq('id', id)
+        .eq('vendeur_id', session.id)
         .single();
       if (error) throw error;
       if (data) {
@@ -81,9 +82,14 @@ export default function VendeurProduitForm() {
         setVillesVente(data.villes_vente || []);
         setVisibleStore(data.visible_store !== false);
         setProduitId(data.id);
+      } else {
+        alert('Produit introuvable.');
+        navigate('/vendeur/produits');
       }
     } catch (err) {
-      console.error('Erreur:', err);
+      console.error('Erreur chargement:', err);
+      alert('Impossible de charger ce produit.');
+      navigate('/vendeur/produits');
     } finally {
       setLoadingProduit(false);
     }
@@ -124,13 +130,11 @@ export default function VendeurProduitForm() {
       };
 
       if (produitId) {
-        await updateProduitComplet(produitId, productData);
+        await updateProduitComplet(produitId, productData, session.id);
         alert('Produit modifié !');
       } else {
-        // Générer lien unique
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        let lienUnique = '';
-        for (let i = 0; i < 6; i++) lienUnique += chars[Math.floor(Math.random() * chars.length)];
+        // Générer lien unique cryptographique
+        const lienUnique = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
 
         const { error } = await supabase.from('produits').insert([{
           ...productData,
@@ -143,8 +147,8 @@ export default function VendeurProduitForm() {
       }
       navigate('/vendeur/produits');
     } catch (err: any) {
-      console.error('Erreur:', err);
-      alert(err.message || 'Erreur lors de la sauvegarde');
+      console.error('Erreur sauvegarde:', err);
+      alert('Une erreur est survenue lors de la sauvegarde.');
     } finally {
       setLoading(false);
     }
@@ -155,12 +159,12 @@ export default function VendeurProduitForm() {
     if (!confirm('Supprimer ce produit ?')) return;
     setLoading(true);
     try {
-      const { error } = await supabase.from('produits').delete().eq('id', produitId);
-      if (error) throw error;
+      await deleteProduit(produitId, session.id);
       alert('Produit supprimé');
       navigate('/vendeur/produits');
     } catch (err: any) {
-      alert(err.message || 'Erreur');
+      console.error('Erreur suppression:', err);
+      alert('Impossible de supprimer ce produit.');
     } finally {
       setLoading(false);
     }
