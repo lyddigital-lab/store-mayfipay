@@ -34,6 +34,7 @@ export default function SSOCallback() {
           tel: userData.tel,
           role: 'vendeur',
           pays: userData.pays || '',
+          photo: userData.photo || '',
         }));
         localStorage.removeItem('store_acheteur_user');
       } else {
@@ -43,12 +44,19 @@ export default function SSOCallback() {
           tel: userData.tel,
           role: 'acheteur',
           pays: userData.pays || '',
+          photo: userData.photo || '',
         }));
         localStorage.removeItem('store_vendeur_user');
       }
 
+      // Acheteur : revenir à la page mémorisée avant le login (ex: paiement en cours)
+      let buyerTarget = '/';
+      const saved = localStorage.getItem('store_redirect');
+      localStorage.removeItem('store_redirect');
+      if (saved && saved.startsWith('/') && !saved.startsWith('//')) buyerTarget = saved;
+
       // Redirection automatique après 3 secondes
-      const target = role === 'vendeur' ? (redirect === '/' ? '/vendeur' : redirect) : redirect;
+      const target = role === 'vendeur' ? (redirect === '/' ? '/vendeur' : redirect) : buyerTarget;
       setTimeout(() => navigate(target, { replace: true }), 3000);
     } catch (e) {
       setError('Erreur lors de la lecture de la session');

@@ -17,6 +17,7 @@ export interface VendeurSession {
   nom: string;
   tel: string;
   role: string;
+  photo?: string;
 }
 
 export function getVendeurSession(): VendeurSession | null {
@@ -42,6 +43,7 @@ export interface AcheteurSession {
   nom: string;
   tel: string;
   role: string;
+  photo?: string;
 }
 
 export function getAcheteurSession(): AcheteurSession | null {

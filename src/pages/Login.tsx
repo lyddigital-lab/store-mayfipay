@@ -13,6 +13,12 @@ export default function Login() {
     if (getAcheteurSession()) navigate(redirect, { replace: true });
   }, [navigate, redirect]);
 
+  // Mémoriser la page d'origine pour y revenir après la connexion SSO
+  useEffect(() => {
+    const target = redirect && redirect.startsWith('/') && redirect !== '/' ? redirect : '/';
+    localStorage.setItem('store_redirect', target);
+  }, [redirect]);
+
   const returnUrl = encodeURIComponent(window.location.origin + '/sso');
   const ssoUrl = `https://app.mayfipay.com/login?redirect=${returnUrl}&source=store&intent=buyer`;
   const registerUrl = `https://app.mayfipay.com/register?redirect=${returnUrl}&source=store&intent=buyer`;

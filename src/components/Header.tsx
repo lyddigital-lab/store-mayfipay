@@ -1,11 +1,17 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Store, User, LogOut } from 'lucide-react';
 import { getAcheteurSession, clearAcheteurSession } from '../lib/supabase';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Header() {
-  const session = getAcheteurSession();
+  const location = useLocation();
   const [showMenu, setShowMenu] = useState(false);
+  const [session, setSession] = useState(() => getAcheteurSession());
+
+  // Resynchroniser la session à chaque changement de route (retour SSO, déconnexion…)
+  useEffect(() => {
+    setSession(getAcheteurSession());
+  }, [location.pathname]);
 
   return (
     <header className="bg-white border-b border-gray-200">
@@ -27,9 +33,17 @@ export default function Header() {
                   onClick={() => setShowMenu(!showMenu)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-orange-50 text-mayfipay-orange text-sm font-medium hover:bg-orange-100"
                 >
-                  <div className="w-6 h-6 rounded-full bg-mayfipay-orange text-white flex items-center justify-center text-xs font-bold shrink-0">
-                    {session.nom.charAt(0).toUpperCase()}
-                  </div>
+                  {session.photo ? (
+                    <img
+                      src={session.photo}
+                      alt={session.nom}
+                      className="w-6 h-6 rounded-full object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-mayfipay-orange text-white flex items-center justify-center text-xs font-bold shrink-0">
+                      {session.nom.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <span className="hidden sm:block text-sm">{session.nom.split(' ')[0]}</span>
                 </button>
                 {showMenu && (
