@@ -28,8 +28,9 @@ export default function Paiement() {
   const villesNoms = villesDisponibles.map(v => v.ville);
 
   const fraisExpedition = expeditionInfo?.cout || 0;
-  const fraisAcheteur = produit ? Math.round(produit.prix * 0.035) : 0;
-  const total = produit ? produit.prix + fraisAcheteur + fraisExpedition : 0;
+  const baseFraisAcheteur = produit ? produit.prix + fraisExpedition : 0;
+  const fraisAcheteur = produit ? Math.round(baseFraisAcheteur * 0.035) : 0;
+  const total = produit ? produit.prix + fraisExpedition + fraisAcheteur : 0;
 
   useEffect(() => {
     // Rediriger si pas connecté
@@ -82,7 +83,7 @@ export default function Paiement() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          amount: total,
+          amount: produit.prix + fraisExpedition,
           currency: 'XAF',
           external_id: `store_${session.id}_${produit.id}_${Date.now()}`,
           description: `Achat: ${produit.nom}`,
@@ -207,7 +208,7 @@ export default function Paiement() {
               <span>{formatPrix(produit.prix)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-mayfipay-text-sec">Frais Mobile Money (3.5%)</span>
+              <span className="text-mayfipay-text-sec">Frais Mobile Money (3,5% du total)</span>
               <span>+{formatPrix(fraisAcheteur)}</span>
             </div>
             {fraisExpedition > 0 && (
