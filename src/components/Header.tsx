@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Store, User, LogOut, Search, X } from 'lucide-react';
-import { getAcheteurSession, clearAcheteurSession } from '../lib/supabase';
+import { getAcheteurSession, clearAcheteurSession, getVendeurSession } from '../lib/supabase';
 
 export default function Header() {
   const location = useLocation();
@@ -9,6 +9,7 @@ export default function Header() {
   const [searchParams] = useSearchParams();
   const [showMenu, setShowMenu] = useState(false);
   const [session, setSession] = useState(() => getAcheteurSession());
+  const [vendeurSession, setVendeurSession] = useState(() => getVendeurSession());
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
   useEffect(() => {
@@ -17,6 +18,7 @@ export default function Header() {
 
   useEffect(() => {
     setSession(getAcheteurSession());
+    setVendeurSession(getVendeurSession());
   }, [location.pathname]);
 
   function handleSearch(e: React.FormEvent) {
@@ -83,7 +85,7 @@ export default function Header() {
                       <User className="w-4 h-4 text-mayfipay-orange" />
                       Mon compte
                     </Link>
-                    {session.role === 'vendeur' && (
+                    {vendeurSession && (
                       <Link
                         to="/vendeur"
                         onClick={() => setShowMenu(false)}

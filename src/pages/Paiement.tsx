@@ -207,16 +207,16 @@ export default function Paiement() {
               <span className="text-mayfipay-text-sec">Prix produit</span>
               <span>{formatPrix(produit.prix)}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-mayfipay-text-sec">Frais Mobile Money (3,5% du total)</span>
-              <span>+{formatPrix(fraisAcheteur)}</span>
-            </div>
             {fraisExpedition > 0 && (
               <div className="flex justify-between">
                 <span className="text-mayfipay-text-sec">Frais d'expédition</span>
                 <span>+{formatPrix(fraisExpedition)}</span>
               </div>
             )}
+            <div className="flex justify-between">
+              <span className="text-mayfipay-text-sec">Frais Mobile Money (3,5% du total)</span>
+              <span>+{formatPrix(fraisAcheteur)}</span>
+            </div>
             <div className="border-t border-mayfipay-border mt-2 pt-2 flex justify-between font-bold">
               <span>Total à payer</span>
               <span className="text-mayfipay-orange text-lg">{formatPrix(total)}</span>
