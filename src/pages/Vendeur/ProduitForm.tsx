@@ -109,6 +109,17 @@ export default function VendeurProduitForm() {
       return;
     }
 
+    const prixNum = parseInt(prix);
+    const stockNum = parseInt(stock);
+    if (!Number.isFinite(prixNum) || prixNum <= 0 || prixNum > 10000000) {
+      alert('Le prix doit etre un nombre positif (max 10 000 000 F).');
+      return;
+    }
+    if (!Number.isInteger(stockNum) || stockNum < 0) {
+      alert('Le stock doit etre un entier positif ou nul.');
+      return;
+    }
+
     const session = getVendeurSession();
     if (!session) {
       alert('Non connecté');
@@ -119,14 +130,14 @@ export default function VendeurProduitForm() {
     try {
       const productData = {
         nom: nom.trim(),
-        prix: parseInt(prix),
-        stock: parseInt(stock),
+        prix: prixNum,
+        stock: stockNum,
         description: description.trim() || null,
         categories,
         photos,
         villes_vente: villesVente,
         visible_store: visibleStore,
-        actif: parseInt(stock) > 0,
+        actif: stockNum > 0,
       };
 
       if (produitId) {
