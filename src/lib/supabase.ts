@@ -469,6 +469,27 @@ export async function creerOuTrouverAcheteur(tel: string, nom: string): Promise<
   return newUser.id;
 }
 
+// Regles MayfiPay configurables depuis le panel admin (app_settings)
+let cachedRegles: { frais_acheteur: number; commission_app: number } | null = null;
+
+export async function getReglesMayfipay(): Promise<{ frais_acheteur: number; commission_app: number }> {
+  if (cachedRegles) return cachedRegles;
+  try {
+    const { data } = await supabase
+      .from('app_settings')
+      .select('frais_acheteur, commission_app')
+      .eq('app_id', 'mayfipay')
+      .maybeSingle();
+    cachedRegles = {
+      frais_acheteur: data?.frais_acheteur != null && Number(data.frais_acheteur) >= 0 ? Number(data.frais_acheteur) : 0.035,
+      commission_app: data?.commission_app != null && Number(data.commission_app) >= 0 ? Number(data.commission_app) : 0.035,
+    };
+  } catch {
+    cachedRegles = { frais_acheteur: 0.035, commission_app: 0.035 };
+  }
+  return cachedRegles;
+}
+
 export async function creerCommande(data: {
   produit_id: string;
   acheteur_id: string;
@@ -476,9 +497,10 @@ export async function creerCommande(data: {
   montant: number;
   adresse_livraison: { nom: string; tel: string; ville: string; quartier: string };
 }) {
-  // Générer un code de commande
+  // Generer un code de commande
   const code = 'STR' + Date.now().toString(36).toUpperCase();
-  const commission = Math.round(data.montant * 0.035);
+  const regles = await getReglesMayfipay();
+  const commission = Math.round(data.montant * regles.commission_app);
   const montant_net = data.montant - commission;
 
   const { data: commande, error } = await supabase

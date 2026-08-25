@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { getProduitDetail, checkDisponibiliteVille, getAcheteurSession } from '../lib/supabase';
+import { getProduitDetail, checkDisponibiliteVille, getAcheteurSession, getReglesMayfipay } from '../lib/supabase';
 import { formatPrix } from '../utils/helpers';
 import type { Produit, ExpeditionInfo } from '../types';
 import { Shield, Lock } from 'lucide-react';
@@ -29,7 +29,12 @@ export default function Paiement() {
 
   const fraisExpedition = expeditionInfo?.cout || 0;
   const baseFraisAcheteur = produit ? produit.prix + fraisExpedition : 0;
-  const fraisAcheteur = produit ? Math.round(baseFraisAcheteur * 0.035) : 0;
+  // Taux configurable depuis le panel admin (app_settings), charge au montage
+  const [tauxFraisAcheteur, setTauxFraisAcheteur] = useState(0.035);
+  useEffect(() => {
+    getReglesMayfipay().then((r) => setTauxFraisAcheteur(r.frais_acheteur));
+  }, []);
+  const fraisAcheteur = produit ? Math.round(baseFraisAcheteur * tauxFraisAcheteur) : 0;
   const total = produit ? produit.prix + fraisExpedition + fraisAcheteur : 0;
 
   useEffect(() => {
