@@ -28,13 +28,47 @@ export default function Paiement() {
   const villesNoms = villesDisponibles.map(v => v.ville);
 
   const fraisExpedition = expeditionInfo?.cout || 0;
-  const baseFraisAcheteur = produit ? produit.prix + fraisExpedition : 0;
-  // Taux configurable depuis le panel admin (app_settings), charge au montage
+
+  // Quote serveur : les frais sont calcules par l'API MayfiPay (meme logique
+  // que la creation de paiement) — le client n'invente plus aucun montant.
+  const [quote, setQuote] = useState<{ frais: number; total: number; taux: number } | null>(null);
+  const [quoteError, setQuoteError] = useState(false);
+
+  useEffect(() => {
+    if (!produit) return;
+    const amount = produit.prix + fraisExpedition;
+    let cancelled = false;
+    setQuote(null);
+    setQuoteError(false);
+    const MAYFIPAY_API_KEY = import.meta.env.VITE_MAYFIPAY_API_KEY;
+    fetch('https://api.mayfipay.com/v1/quote', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${MAYFIPAY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ amount }),
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        if (d?.success && typeof d.montant_total === 'number') {
+          setQuote({ frais: d.frais_acheteur, total: d.montant_total, taux: d.taux_frais_acheteur ?? 0.035 });
+        } else {
+          setQuoteError(true);
+        }
+      })
+      .catch(() => { if (!cancelled) setQuoteError(true); });
+    return () => { cancelled = true; };
+  }, [produit, fraisExpedition]);
+
+  // Fallback : si la quote est indisponible, on retombe sur app_settings
+  // (comportement anterieur) pour ne jamais bloquer le parcours d'achat.
   const [tauxFraisAcheteur, setTauxFraisAcheteur] = useState(0.035);
   useEffect(() => {
     getReglesMayfipay().then((r) => setTauxFraisAcheteur(r.frais_acheteur));
   }, []);
-  const fraisAcheteur = produit ? Math.round(baseFraisAcheteur * tauxFraisAcheteur) : 0;
+  const fraisAcheteur = quote ? quote.frais : (produit ? Math.round((produit.prix + fraisExpedition) * tauxFraisAcheteur) : 0);
   const total = produit ? produit.prix + fraisExpedition + fraisAcheteur : 0;
 
   useEffect(() => {
@@ -219,9 +253,12 @@ export default function Paiement() {
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-mayfipay-text-sec">Frais Mobile Money (3,5% du total)</span>
+              <span className="text-mayfipay-text-sec">Frais Mobile Money ({((quote ? quote.taux : tauxFraisAcheteur) * 100).toFixed(1).replace('.', ',')}% du total)</span>
               <span>+{formatPrix(fraisAcheteur)}</span>
             </div>
+            {quoteError && (
+              <p className="text-xs text-amber-600">Frais estimés localement (service de devis momentanément indisponible — le montant définitif sera confirmé par le serveur au paiement).</p>
+            )}
             <div className="border-t border-mayfipay-border mt-2 pt-2 flex justify-between font-bold">
               <span>Total à payer</span>
               <span className="text-mayfipay-orange text-lg">{formatPrix(total)}</span>

@@ -13,6 +13,7 @@ export default function VendeurProduitForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEdit = !!id;
+  const session = getVendeurSession();
 
   const [nom, setNom] = useState('');
   const [prix, setPrix] = useState('');
@@ -69,7 +70,7 @@ export default function VendeurProduitForm() {
         .from('produits')
         .select('*')
         .eq('id', id)
-        .eq('vendeur_id', session.id)
+        .eq('vendeur_id', session!.id)
         .single();
       if (error) throw error;
       if (data) {
@@ -170,7 +171,7 @@ export default function VendeurProduitForm() {
     if (!confirm('Supprimer ce produit ?')) return;
     setLoading(true);
     try {
-      await deleteProduit(produitId, session.id);
+      await deleteProduit(produitId, session!.id);
       alert('Produit supprimé');
       navigate('/vendeur/produits');
     } catch (err: any) {
