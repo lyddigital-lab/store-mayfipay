@@ -6,10 +6,32 @@ import type { Commande } from '../../types';
 export default function VendeurCommandes() {
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
+  const [namesMap, setNamesMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     loadCommandes();
   }, []);
+
+  useEffect(() => {
+    // Enrich commands with buyer names
+    const enrichNames = async () => {
+      const session = getVendeurSession();
+      if (!session) return;
+      const namesMap: Record<string, string> = {};
+      // Get unique buyer IDs
+      const buyerIds = [...new Set(commandes.map(c => c.acheteur_id))];
+      for (const buyerId of buyerIds) {
+        if (buyerId) {
+          const user = await getUserName(buyerId);
+          namesMap[buyerId] = user;
+        }
+      }
+      // Update commands with buyer names (this is a simple approach - in production, would use state)
+      // We'll just store the names map for use in rendering
+      setNamesMap(namesMap);
+    };
+    enrichNames();
+  }, [commandes]);
 
   async function loadCommandes() {
     try {
@@ -68,7 +90,7 @@ export default function VendeurCommandes() {
                   <tr key={c.id} className="border-t border-mayfipay-border">
                     <td className="px-4 py-2 text-sm text-mayfipay-text">{c.code}</td>
                     <td className="px-4 py-2 text-sm text-mayfipay-text">{c.produit?.nom || '—'}</td>
-                    <td className="px-4 py-2 text-sm text-mayfipay-text">{c.acheteur_id?.substring(0, 8) + '...'}</td>
+                    <td className="px-4 py-2 text-sm text-mayfipay-text">{namesMap[c.acheteur_id] || c.acheteur_id?.substring(0, 8) + '...'}</td>
                     <td className="px-4 py-2 text-right text-sm text-mayfipay-text">{formatPrix(c.montant)}</td>
                     <td className="px-4 py-2 text-center">
                       <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${getStatutColor(c.statut)}`}>
