@@ -36,7 +36,10 @@ export default function VendeurDashboard() {
     }
   }
 
-  const totalVentes = commandes.filter(c => c.statut === 'livree').reduce((sum, c) => sum + c.montant_net, 0);
+  const totalVentes = commandes.filter(c => c.statut === 'livree').reduce((sum, c) => {
+      const val = c.montant_net ?? 0;
+      return sum + (typeof val === 'number' ? val : 0);
+    }, 0);
   const totalCommandes = commandes.length;
   const enAttente = commandes.filter(c => c.statut === 'en_attente_paiement').length;
   // const payee = commandes.filter(c => c.statut === 'payee').length;
@@ -44,7 +47,7 @@ export default function VendeurDashboard() {
   const livree = commandes.filter(c => c.statut === 'livree').length;
   // const annulee = commandes.filter(c => c.statut === 'annulee').length;
   const tauxConversion = totalCommandes > 0 ? Math.round((livree / totalCommandes) * 100) : 0;
-  const panierMoyen = totalCommandes > 0 ? Math.round(totalVentes / totalCommandes) : 0;
+  const panierMoyen = totalCommandes > 0 ? Math.round((totalVentes / totalCommandes) + Number.EPSILON * 100) : 0;
 
   function handleSwitchAcheteur() {
     const s = getVendeurSession();
