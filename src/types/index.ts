@@ -63,6 +63,7 @@ export interface Produit {
   prix: number;
   description: string | null;
   stock: number;
+  stock_min?: number; // Seuil alerte rupture
   categorie: string | null;
   categories: string[];
   emoji: string;
@@ -77,7 +78,20 @@ export interface Produit {
   visible_store: boolean;
   created_at: string;
   vendeur?: { nom: string; tel: string; pays: string | null };
+  poids?: number; // en grammes
+  largeur?: number; // en cm
+  hauteur?: number; // en cm
+  profondeur?: number; // en cm
 }
+
+export type CommandeStatut = 
+  | 'en_attente_paiement' 
+  | 'payee' 
+  | 'en_cours' 
+  | 'livree' 
+  | 'terminee' 
+  | 'annulee' 
+  | 'litige';
 
 export interface Commande {
   id: string;
@@ -88,7 +102,7 @@ export interface Commande {
   montant: number;
   commission: number;
   montant_net: number;
-  statut: string;
+  statut: CommandeStatut;
   adresse_livraison: {
     nom?: string;
     tel?: string;
@@ -109,6 +123,15 @@ export interface User {
   role: 'acheteur' | 'vendeur';
   avatar: string | null;
   kyc_verified: boolean;
+}
+
+export interface Avis {
+  id: string;
+  produit_id: string;
+  acheteur_id: string;
+  note: number; // 1 à 5
+  commentaire?: string;
+  créé_à: string;
 }
 
 export interface Livreur {

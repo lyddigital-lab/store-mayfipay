@@ -38,6 +38,13 @@ export default function VendeurDashboard() {
 
   const totalVentes = commandes.filter(c => c.statut === 'livree').reduce((sum, c) => sum + c.montant_net, 0);
   const totalCommandes = commandes.length;
+  const enAttente = commandes.filter(c => c.statut === 'en_attente_paiement').length;
+  // const payee = commandes.filter(c => c.statut === 'payee').length;
+  // const enCours = commandes.filter(c => c.statut === 'en_cours').length;
+  const livree = commandes.filter(c => c.statut === 'livree').length;
+  // const annulee = commandes.filter(c => c.statut === 'annulee').length;
+  const tauxConversion = totalCommandes > 0 ? Math.round((livree / totalCommandes) * 100) : 0;
+  const panierMoyen = totalCommandes > 0 ? Math.round(totalVentes / totalCommandes) : 0;
 
   function handleSwitchAcheteur() {
     const s = getVendeurSession();
@@ -99,18 +106,33 @@ export default function VendeurDashboard() {
             </span>
           </div>
 
-          <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+<div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-lg border border-mayfipay-border bg-white p-4">
               <p className="text-2xl font-bold text-mayfipay-orange">{totalVentes.toLocaleString('fr-FR')} FCFA</p>
               <p className="text-sm text-mayfipay-text-sec">Ventes totales</p>
             </div>
             <div className="rounded-lg border border-mayfipay-border bg-white p-4">
-              <p className="text-2xl font-bold text-mayfipay-text">{totalCommandes}</p>
-              <p className="text-sm text-mayfipay-text-sec">Commandes</p>
+              <p className="text-2xl font-bold text-mayfipay-blue">{panierMoyen.toLocaleString('fr-FR')} FCFA</p>
+              <p className="text-sm text-mayfipay-textsec">Panier moyen</p>
             </div>
             <div className="rounded-lg border border-mayfipay-border bg-white p-4">
-              <p className="text-2xl font-bold text-mayfipay-blue">{commandes.filter(c => c.statut === 'en_attente_paiement').length}</p>
-              <p className="text-sm text-mayfipay-text-sec">En attente</p>
+              <p className="text-2xl font-bold text-mayfipay-green">{tauxConversion}%</p>
+              <p className="text-sm text-mayfipay-textsec">Taux conversion</p>
+            </div>
+          </div>
+
+          <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="rounded-lg border border-mayfipay-border bg-white p-4">
+              <p className="text-2xl font-bold text-mayfipay-orange">{totalCommandes}</p>
+              <p className="text-sm text-mayfipay-textsec">Commandes totales</p>
+            </div>
+            <div className="rounded-lg border border-mayfipay-border bg-white p-4">
+              <p className="text-2xl font-bold text-mayfipay-yellow">{enAttente}</p>
+              <p className="text-sm text-mayfipay-textsec">En attente</p>
+            </div>
+            <div className="rounded-lg border border-mayfipay-border bg-white p-4">
+              <p className="text-2xl font-bold text-mayfipay-green">{livree}</p>
+              <p className="text-sm text-mayfipay-textsec">Livrées</p>
             </div>
           </div>
 

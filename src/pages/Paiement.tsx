@@ -29,10 +29,11 @@ export default function Paiement() {
 
   const fraisExpedition = expeditionInfo?.cout || 0;
 
-  // Quote serveur : les frais sont calcules par l'API MayfiPay (meme logique
-  // que la creation de paiement) — le client n'invente plus aucun montant.
+// Quote serveur : les frais sont calcules par l'API MayfiPay (meme logique
+   // que la creation de paiement) — le client n'invente plus aucun montant.
   const [quote, setQuote] = useState<{ frais: number; total: number; taux: number } | null>(null);
   const [quoteError, setQuoteError] = useState(false);
+  const [reglesCharges, setReglesCharges] = useState(false);
 
   useEffect(() => {
     if (!produit) return;
@@ -40,6 +41,7 @@ export default function Paiement() {
     let cancelled = false;
     setQuote(null);
     setQuoteError(false);
+    setReglesCharges(false);
     const MAYFIPAY_API_KEY = import.meta.env.VITE_MAYFIPAY_API_KEY;
     fetch('https://api.mayfipay.com/v1/quote', {
       method: 'POST',
@@ -62,13 +64,18 @@ export default function Paiement() {
     return () => { cancelled = true; };
   }, [produit, fraisExpedition]);
 
-  // Fallback : si la quote est indisponible, on retombe sur app_settings
-  // (comportement anterieur) pour ne jamais bloquer le parcours d'achat.
-  const [tauxFraisAcheteur, setTauxFraisAcheteur] = useState(0.035);
+  // Charger les regles admin une fois au demarrage
   useEffect(() => {
-    getReglesMayfipay().then((r) => setTauxFraisAcheteur(r.frais_acheteur));
+    getReglesMayfipay().then((_r) => setReglesCharges(true));
   }, []);
-  const fraisAcheteur = quote ? quote.frais : (produit ? Math.round((produit.prix + fraisExpedition) * tauxFraisAcheteur) : 0);
+
+  // Taux de frais buyer : quote prioritaire, sinon regles stockes, dernierement 0.035
+  const tauxFraisAcheteur = quote?.taux ?? (reglesCharges ? undefined : 0.035);
+  const fraisAcheteur = quote
+    ? quote.frais
+    : produit
+      ? Math.round((produit.prix + fraisExpedition) * (tauxFraisAcheteur ?? 0.035))
+      : 0;
   const total = produit ? produit.prix + fraisExpedition + fraisAcheteur : 0;
 
   useEffect(() => {

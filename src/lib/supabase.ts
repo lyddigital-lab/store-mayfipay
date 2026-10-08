@@ -471,23 +471,47 @@ export async function creerOuTrouverAcheteur(tel: string, nom: string): Promise<
 
 // Regles MayfiPay configurables depuis le panel admin (app_settings)
 let cachedRegles: { frais_acheteur: number; commission_app: number } | null = null;
+let pendingRegles: Promise<{ frais_acheteur: number; commission_app: number }> | null = null;
 
 export async function getReglesMayfipay(): Promise<{ frais_acheteur: number; commission_app: number }> {
   if (cachedRegles) return cachedRegles;
-  try {
-    const { data } = await supabase
-      .from('app_settings')
-      .select('frais_acheteur, commission_app')
-      .eq('app_id', 'mayfipay')
-      .maybeSingle();
-    cachedRegles = {
-      frais_acheteur: data?.frais_acheteur != null && Number(data.frais_acheteur) >= 0 ? Number(data.frais_acheteur) : 0.035,
-      commission_app: data?.commission_app != null && Number(data.commission_app) >= 0 ? Number(data.commission_app) : 0.035,
-    };
-  } catch {
-    cachedRegles = { frais_acheteur: 0.035, commission_app: 0.035 };
-  }
-  return cachedRegles;
+  if (pendingRegles) return pendingRegles;
+
+  pendingRegles = (async () => {
+    try {
+      const { data } = await supabase
+        .from('app_settings')
+        .select('frais_acheteur, commission_app')
+        .eq('app_id', 'mayfipay')
+        .maybeSingle();
+      cachedRegles = {
+        frais_acheteur: data?.frais_acheteur != null && Number(data.frais_acheteur) >= 0 ? Number(data.frais_acheteur) : 0.035,
+        commission_app: data?.commission_app != null && Number(data.commission_app) >= 0 ? Number(data.commission_app) : 0.035,
+      };
+    } catch {
+      cachedRegles = { frais_acheteur: 0.035, commission_app: 0.035 };
+    } finally {
+      pendingRegles = null;
+    }
+    return cachedRegles;
+  })();
+
+return pendingRegles;
+}
+
+/** Produits en dessous du seuil de stock minimum */
+export async function getProduitsRuptureStock(vendeurId: string) {
+  const { data } = await supabase
+    .from('produits')
+    .select('id, nom, stock, stock_min')
+    .eq('vendeur_id', vendeurId)
+    .eq('actif', true);
+
+  if (!data?.length) return [];
+
+  return data.filter(
+    (p: { stock: number; stock_min?: number }) => p.stock <= (p.stock_min || 0)
+  );
 }
 
 export async function creerCommande(data: {
@@ -497,8 +521,8 @@ export async function creerCommande(data: {
   montant: number;
   adresse_livraison: { nom: string; tel: string; ville: string; quartier: string };
 }) {
-  // Generer un code de commande
-  const code = 'STR' + Date.now().toString(36).toUpperCase();
+  // Generer un code de commande unique (évite les doublons si appel dans la même ms)
+  const code = 'STR' + Date.now().toString(36).padStart(6, '0').toUpperCase() + Math.random().toString(36).substr(2, 4).toUpperCase();
   const regles = await getReglesMayfipay();
   const commission = Math.round(data.montant * regles.commission_app);
   const montant_net = data.montant - commission;
@@ -521,5 +545,42 @@ export async function creerCommande(data: {
 
   if (error) throw error;
   return commande;
+}
+
+/** Mise à jour du statut d'une commande (IDOR protégé par vendeur_id) */
+export async function mettreAJourStatutCommande(
+  commandeId: string,
+  nouveauStatut: keyof typeof CommandeStatut,
+  vendeurId: string
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('commandes')
+    .update({ statut: nouveauStatut })
+    .eq('id', commandeId)
+    .eq('vendeur_id', vendeurId);
+
+  if (error) throw error;
+  return true;
+}
+
+
+
+/** Récupérer la note moyenne d'un produit */
+export async function getNoteMoyenneProduit(produitId: string) {
+  const { data } = await supabase
+    .from('avis')
+    .select('note')
+    .eq('produit_id', produitId);
+
+  if (!data?.length) return 0;
+
+  const total = data.reduce((sum, a) => sum + a.note, 0);
+  return Math.round((total / data.length) * 10) / 10; // 1 décimale
+}
+
+/** Nombre d'avis d'un produit */
+export function getNbAvisProduit(produitId: string) {
+  // Note: in a real implementation, would count avis rows from Supabase
+  return 0;
 }
 
