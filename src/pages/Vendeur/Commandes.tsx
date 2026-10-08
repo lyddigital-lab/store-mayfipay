@@ -68,7 +68,7 @@ export default function VendeurCommandes() {
                   <tr key={c.id} className="border-t border-mayfipay-border">
                     <td className="px-4 py-2 text-sm text-mayfipay-text">{c.code}</td>
                     <td className="px-4 py-2 text-sm text-mayfipay-text">{c.produit?.nom || '—'}</td>
-                    <td className="px-4 py-2 text-sm text-mayfipay-text">{c.acheteur_id}</td>
+                    <td className="px-4 py-2 text-sm text-mayfipay-text">{c.acheteur_id?.substring(0, 8) + '...'}</td>
                     <td className="px-4 py-2 text-right text-sm text-mayfipay-text">{formatPrix(c.montant)}</td>
                     <td className="px-4 py-2 text-center">
                       <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${getStatutColor(c.statut)}`}>
