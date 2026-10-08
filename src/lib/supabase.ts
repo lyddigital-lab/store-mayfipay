@@ -584,3 +584,15 @@ export function getNbAvisProduit(produitId: string) {
   return 0;
 }
 
+/** Récupérer le nom d'un utilisateur par son ID */
+export async function getUserName(userId: string): Promise<string> {
+  const { data } = await supabase
+    .from('users')
+    .select('nom')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (!data?.nom) return 'Inconnu';
+  return data.nom;
+}
+
