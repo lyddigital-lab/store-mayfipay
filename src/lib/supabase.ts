@@ -81,19 +81,25 @@ export async function getBoutiques() {
 
   if (error) throw error;
 
-  // Ajouter le nombre de produits pour chaque boutique
-  const withCounts = await Promise.all(
-    (data || []).map(async (boutique) => {
-      const { count } = await supabase
-        .from('boutiques_produits')
-        .select('*', { count: 'exact', head: true })
-        .eq('boutique_id', boutique.id)
-        .eq('visible', true);
-      return { ...boutique, nb_produits: count || 0 };
-    })
-  );
+  if (!data || data.length === 0) return [];
 
-  return withCounts as Boutique[];
+  // Compter les produits par boutique en une seule requête (évite le N+1)
+  const boutiqueIds = data.map((b: any) => b.id);
+  const { data: produitCounts } = await supabase
+    .from('boutiques_produits')
+    .select('boutique_id')
+    .eq('visible', true)
+    .in('boutique_id', boutiqueIds);
+
+  const countsMap: Record<string, number> = {};
+  (produitCounts || []).forEach((pc: any) => {
+    countsMap[pc.boutique_id] = (countsMap[pc.boutique_id] || 0) + 1;
+  });
+
+  return data.map((boutique: any) => ({
+    ...boutique,
+    nb_produits: countsMap[boutique.id] || 0,
+  }));
 }
 
 export async function getBoutiqueBySlug(slug: string) {
@@ -154,15 +160,19 @@ export async function getProduitsStore(filters?: {
     query = query.or(`nom.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
   }
 
+  // Filtrer par pays côté serveur (via jointure vendeurs.pays)
+  if (filters?.paysCode) {
+    const variants = PAYS_CODE_TO_NOMS[filters.paysCode] || [];
+    if (variants.length > 0) {
+      const orConditions = variants.map(v => `vendeur.pays.ilike.%${v}%`).join(',');
+      query = query.or(orConditions);
+    }
+  }
+
   const { data, error } = await query;
   if (error) throw error;
 
   let produits = (data || []) as Produit[];
-
-  // Filtre pays côté client (utilise le mapping code → noms pour matcher)
-  if (filters?.paysCode) {
-    produits = produits.filter((p: any) => matchPaysCode(filters.paysCode!, p.vendeur?.pays));
-  }
 
   // Filtre ville côté client (car c'est dans le tableau villes_vente)
   if (filters?.ville) {
@@ -579,9 +589,14 @@ export async function getNoteMoyenneProduit(produitId: string) {
 }
 
 /** Nombre d'avis d'un produit */
-export function getNbAvisProduit(produitId: string) {
-  // Note: in a real implementation, would count avis rows from Supabase
-  return 0;
+export async function getNbAvisProduit(produitId: string): Promise<number> {
+  const { data, error } = await supabase
+    .from('avis')
+    .select('id', { count: 'exact', head: true })
+    .eq('produit_id', produitId);
+
+  if (error) throw error;
+  return data?.length || 0;
 }
 
 /** Récupérer le nom d'un utilisateur par son ID */

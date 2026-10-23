@@ -260,7 +260,7 @@ export default function Paiement() {
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-mayfipay-text-sec">Frais Mobile Money ({((quote ? quote.taux : tauxFraisAcheteur) * 100).toFixed(1).replace('.', ',')}% du total)</span>
+              <span className="text-mayfipay-text-sec">Frais Mobile Money ({((quote?.taux ?? tauxFraisAcheteur ?? 0.035) * 100).toFixed(1).replace('.', ',')}% du total)</span>
               <span>+{formatPrix(fraisAcheteur)}</span>
             </div>
             {quoteError && (

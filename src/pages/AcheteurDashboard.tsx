@@ -4,6 +4,7 @@ import { supabase, getAcheteurSession, clearAcheteurSession, getVendeurSession }
 import { persistVendeurSession } from '../lib/session';
 import { getKycStatus } from '../lib/kyc';
 import { ShoppingBag, Package, Smartphone, ArrowRight, LogOut, Store } from 'lucide-react';
+import { getStatutLabel, getStatutColor } from '../utils/helpers';
 
 interface Commande {
   id: string;
@@ -14,13 +15,6 @@ interface Commande {
   created_at: string;
   acheteur_nom?: string;
 }
-
-const STATUT_CONFIG: Record<string, { label: string; color: string }> = {
-  payee:    { label: 'En attente de livraison', color: 'bg-yellow-100 text-yellow-700' },
-  en_cours: { label: 'En livraison',            color: 'bg-blue-100 text-blue-700'   },
-  livree:   { label: 'Livrée',                  color: 'bg-green-100 text-green-700' },
-  annulee:  { label: 'Annulée',                 color: 'bg-red-100 text-red-600'     },
-};
 
 export default function AcheteurDashboard() {
   const navigate = useNavigate();
@@ -205,8 +199,7 @@ export default function AcheteurDashboard() {
         ) : (
           <div className="space-y-3">
             {commandes.map(cmd => {
-              const config = STATUT_CONFIG[cmd.statut] || { label: cmd.statut, color: 'bg-gray-100 text-gray-600' };
-              return (
+                return (
                 <div key={cmd.id} className="bg-white rounded-xl border border-mayfipay-border p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
@@ -219,9 +212,9 @@ export default function AcheteurDashboard() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-black text-mayfipay-orange">{cmd.montant.toLocaleString('fr-FR')} F</p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${config.color}`}>
-                        {config.label}
-                      </span>
+<span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getStatutColor(cmd.statut)}`}>
+  {getStatutLabel(cmd.statut)}
+</span>
                     </div>
                   </div>
                 </div>
