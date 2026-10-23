@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getProduitDetail, checkDisponibiliteVille, getAcheteurSession, getReglesMayfipay } from '../lib/supabase';
+import { showSuccess, showError, showLoading } from '../lib/toast';
 import { formatPrix } from '../utils/helpers';
 import type { Produit, ExpeditionInfo } from '../types';
 import { Shield, Lock } from 'lucide-react';
@@ -122,6 +123,8 @@ export default function Paiement() {
 
       const MAYFIPAY_API_KEY = import.meta.env.VITE_MAYFIPAY_API_KEY;
 
+      showLoading('Paiement en cours', 'Votre paiement est en traitement...');
+
       const res = await fetch('https://api.mayfipay.com/v1/payments', {
         method: 'POST',
         headers: {
@@ -157,9 +160,10 @@ export default function Paiement() {
       const checkoutUrl = data?.data?.checkout_url;
       if (!checkoutUrl) throw new Error('Lien de paiement non reçu');
 
+      showSuccess('Paiement initié', 'Redirection vers le paiement sécurisé...');
       window.location.href = checkoutUrl;
     } catch (err: any) {
-      setError(err.message || 'Erreur');
+      showError('Échec du paiement', err.message || 'Une erreur est survenue lors du paiement.');
       setSubmitting(false);
     }
   }

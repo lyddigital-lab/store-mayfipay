@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, ShoppingCart, Truck, Settings, LogOut, Menu, X, Home } from 'lucide-react';
 import { getVendeurSession, clearVendeurSession } from '../../lib/supabase';
 import { useEffect, useState } from 'react';
+import ToastContainer from '../../components/Toast';
 
 export default function VendeurLayout() {
   const navigate = useNavigate();
@@ -110,6 +111,7 @@ export default function VendeurLayout() {
         </nav>
       </aside>
       <main className="flex-1 overflow-y-auto">
+        <ToastContainer />
         <Outlet />
       </main>
     </div>

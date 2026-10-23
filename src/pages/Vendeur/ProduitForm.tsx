@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import { getVendeurSession, supabase, updateProduitComplet, deleteProduit, getBoutiqueByVendeur } from '../../lib/supabase';
+import { showSuccess, showError } from '../../lib/toast';
 import PhotoUploader from '../../components/PhotoUploader';
 import VillesSelector from '../../components/VillesSelector';
 import type { VilleVente } from '../../types';
@@ -106,24 +107,24 @@ export default function VendeurProduitForm() {
 
   async function handleSave() {
     if (!nom || !prix || !stock) {
-      alert('Veuillez remplir tous les champs obligatoires');
+      showError('Champs requis', 'Veuillez remplir tous les champs obligatoires');
       return;
     }
 
     const prixNum = parseInt(prix);
     const stockNum = parseInt(stock);
     if (!Number.isFinite(prixNum) || prixNum <= 0 || prixNum > 10000000) {
-      alert('Le prix doit etre un nombre positif (max 10 000 000 F).');
+      showError('Prix invalide', 'Le prix doit être un nombre positif (max 10 000 000 F).');
       return;
     }
     if (!Number.isInteger(stockNum) || stockNum < 0) {
-      alert('Le stock doit etre un entier positif ou nul.');
+      showError('Stock invalide', 'Le stock doit être un entier positif ou nul.');
       return;
     }
 
     const session = getVendeurSession();
     if (!session) {
-      alert('Non connecté');
+      showError('Session expirée', 'Non connecté');
       return;
     }
 
@@ -143,7 +144,7 @@ export default function VendeurProduitForm() {
 
       if (produitId) {
         await updateProduitComplet(produitId, productData, session.id);
-        alert('Produit modifié !');
+        showSuccess('Produit modifié', 'Votre produit a été mis à jour.');
       } else {
         // Générer lien unique cryptographique
         const lienUnique = crypto.randomUUID().replace(/-/g, '').slice(0, 12);
@@ -155,12 +156,12 @@ export default function VendeurProduitForm() {
           emoji: '📦',
         }]);
         if (error) throw error;
-        alert('Produit ajouté !');
+        showSuccess('Produit ajouté', 'Votre produit est maintenant en ligne.');
       }
       navigate('/vendeur/produits');
     } catch (err: any) {
       console.error('Erreur sauvegarde:', err);
-      alert('Une erreur est survenue lors de la sauvegarde.');
+      showError('Erreur de sauvegarde', 'Une erreur est survenue lors de la sauvegarde.');
     } finally {
       setLoading(false);
     }
@@ -172,11 +173,11 @@ export default function VendeurProduitForm() {
     setLoading(true);
     try {
       await deleteProduit(produitId, session!.id);
-      alert('Produit supprimé');
+      showSuccess('Produit supprimé', 'Le produit a été retiré du store.');
       navigate('/vendeur/produits');
     } catch (err: any) {
       console.error('Erreur suppression:', err);
-      alert('Impossible de supprimer ce produit.');
+      showError('Erreur de suppression', 'Impossible de supprimer ce produit.');
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getVendeurSession, supabase, getLivreursDisponibles, assignerLivreur } from '../../lib/supabase';
+import { showSuccess, showError } from '../../lib/toast';
 import type { Livreur } from '../../types';
 
 export default function VendeurLivreurs() {
@@ -33,7 +34,7 @@ export default function VendeurLivreurs() {
     setAssigning(livreurId);
     try {
       await assignerLivreur(boutiqueId, livreurId);
-      alert('Livreur assigné !');
+      showSuccess('Livreur assigné', 'Le livreur a été affecté à votre boutique.');
     } catch (err) { console.error('Erreur:', err); alert('Erreur.'); }
     finally { setAssigning(null); }
   }
