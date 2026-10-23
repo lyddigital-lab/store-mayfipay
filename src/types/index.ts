@@ -134,6 +134,13 @@ export interface Avis {
   créé_à: string;
 }
 
+export interface Favorite {
+  id: string;
+  produit_id: string;
+  acheteur_id: string;
+  créé_à: string;
+}
+
 export interface Livreur {
   id: string;
   nom: string;

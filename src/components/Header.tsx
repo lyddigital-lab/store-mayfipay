@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import { Store, User, LogOut, Search, X } from 'lucide-react';
+import { Store, User, LogOut, Search, X, Heart } from 'lucide-react';
 import { getAcheteurSession, clearAcheteurSession, getVendeurSession, clearVendeurSession } from '../lib/supabase';
 
 export default function Header() {
@@ -86,6 +86,16 @@ export default function Header() {
                     >
                       <User className="w-4 h-4 text-mayfipay-orange" />
                       Mon compte
+                    </Link>
+                    )}
+                    {acheteurSession && (
+                    <Link
+                      to="/favoris"
+                      onClick={() => setShowMenu(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <Heart className="w-4 h-4 text-mayfipay-orange" />
+                      Mes favoris
                     </Link>
                     )}
                     {vendeurSession && (

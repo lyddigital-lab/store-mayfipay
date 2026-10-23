@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { Produit } from '../types';
 import { formatPrix } from '../utils/helpers';
 import { Package } from 'lucide-react';
+import FavoriteButton from './FavoriteButton';
 
 export default function ProductCard({ produit, boutiqueSlug }: { produit: Produit; boutiqueSlug?: string }) {
   const [imgError, setImgError] = useState(false);
@@ -31,6 +32,11 @@ export default function ProductCard({ produit, boutiqueSlug }: { produit: Produi
               <Package className="h-10 w-10 text-orange-200 mb-1" />
             )}
             <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">MayfiPay</span>
+          </div>
+        )}
+        {produit.vendeur?.nom && (
+          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur backdrop-filter rounded-full px-2 py-1 shadow-sm z-10">
+            <FavoriteButton produitId={produit.id} taille="sm" afficherTexte={false} />
           </div>
         )}
         {produit.stock !== undefined && produit.stock <= 3 && produit.stock > 0 && (

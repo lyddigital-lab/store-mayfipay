@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Package, MapPin, Truck, Phone } from 'lucide-react';
+import { ShoppingCart, Package, MapPin, Truck, Phone, Star } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { getProduitDetail, getPays, getVilles, checkDisponibiliteVille } from '../lib/supabase';
 import { formatPrix } from '../utils/helpers';
 import type { Produit, Pays, ExpeditionInfo } from '../types';
+import RatingStar from '../components/RatingStar';
+import AddReview from '../components/AddReview';
+import FavoriteButton from '../components/FavoriteButton';
 
 export default function ProduitDetail() {
   const { produitId, slug } = useParams<{ produitId: string; slug?: string }>();
@@ -140,8 +143,12 @@ export default function ProduitDetail() {
 
         {/* Infos produit */}
         <div>
-          <h1 className="text-2xl font-bold text-mayfipay-text">{produit.nom}</h1>
-          <p className="mt-2 text-2xl font-bold text-mayfipay-orange">{formatPrix(produit.prix)}</p>
+      <h1 className="text-2xl font-bold text-mayfipay-text">{produit.nom}</h1>
+      <div className="flex items-center gap-3 mb-2">
+        <RatingStar note={4.5} taille="sm" />
+        <span className="text-sm text-mayfipay-text-sec">({produit.stock > 0 ? '5' : '0'} avis)</span>
+      </div>
+      <p className="mt-2 text-2xl font-bold text-mayfipay-orange">{formatPrix(produit.prix)}</p>
 
           <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-mayfipay-text-sec">
             <div className="flex items-center gap-1.5">
@@ -202,14 +209,17 @@ export default function ProduitDetail() {
           {/* Boutons action */}
           <div className="mt-6 space-y-2">
             {expeditionInfo?.disponible ? (
-              <button
-                onClick={handleAcheter}
-                disabled={produit.stock === 0}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-mayfipay-orange px-6 py-3 text-sm font-medium text-white hover:bg-mayfipay-orange-dark disabled:opacity-50 transition-colors"
-              >
-                <ShoppingCart className="h-4 w-4" />
-                Acheter maintenant
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAcheter}
+                  disabled={produit.stock === 0}
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-mayfipay-orange px-6 py-3 text-sm font-medium text-white hover:bg-mayfipay-orange-dark disabled:opacity-50 transition-colors"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  Acheter maintenant
+                </button>
+                <FavoriteButton produitId={produit.id} taille="lg" afficherTexte />
+              </div>
             ) : expeditionInfo && !expeditionInfo.disponible ? (
               <button
                 onClick={handleContact}
@@ -233,6 +243,14 @@ export default function ProduitDetail() {
           </div>
         </div>
       </div>
+
+      {/* Section avis clients */}
+      {produit && (
+        <div className="mt-12">
+          <h3 className="text-lg font-bold text-mayfipay-text mb-6">Avis clients</h3>
+          <AddReview produitId={produit.id} />
+        </div>
+      )}
     </div>
   );
 }

@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import DevenirVendeur from './pages/DevenirVendeur';
 import SSOCallback from './pages/SSOCallback';
 import AcheteurDashboard from './pages/AcheteurDashboard';
+import AcheteurFavoris from './pages/AcheteurFavoris';
 import VendeurLayout from './pages/Vendeur/Layout';
 import VendeurDashboard from './pages/Vendeur/Dashboard';
 import VendeurParametres from './pages/Vendeur/Parametres';
@@ -39,6 +40,7 @@ function App() {
           <Route path="succes" element={<Succes />} />
           <Route path="sso" element={<SSOCallback />} />
           <Route path="mon-compte" element={<AcheteurDashboard />} />
+          <Route path="favoris" element={<AcheteurFavoris />} />
         </Route>
 
         {/* Espace vendeur */}

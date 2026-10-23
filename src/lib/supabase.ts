@@ -611,3 +611,68 @@ export async function getUserName(userId: string): Promise<string> {
   return data.nom;
 }
 
+/** Créer un avis pour un produit */
+export async function creerAvis(data: {
+  produit_id: string;
+  acheteur_id: string;
+  note: number; // 1 à 5
+  commentaire?: string;
+}) {
+  const { error } = await supabase
+    .from('avis')
+    .insert({
+      produit_id: data.produit_id,
+      acheteur_id: data.acheteur_id,
+      note: data.note,
+      commentaire: data.commentaire,
+      créé_à: new Date().toISOString(),
+    });
+  if (error) throw error;
+  return true;
+}
+
+/** ─── Favoris ─────────────────────────────────────────── */
+
+/** Vérifier si un produit est en favori pour un acheteur */
+export async function estProduitFavori(produitId: string, acheteurId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('favoris')
+    .select('id')
+    .eq('produit_id', produitId)
+    .eq('acheteur_id', acheteurId)
+    .maybeSingle();
+  return !!data;
+}
+
+/** Ajouter un produit aux favoris */
+export async function ajouterProduitFavori(produitId: string, acheteurId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('favoris')
+    .insert({ produit_id: produitId, acheteur_id: acheteurId, créé_à: new Date().toISOString() });
+  if (error) throw error;
+  return true;
+}
+
+/** Retirer un produit des favoris */
+export async function retirerProduitFavori(produitId: string, acheteurId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('favoris')
+    .delete()
+    .eq('produit_id', produitId)
+    .eq('acheteur_id', acheteurId);
+  if (error) throw error;
+  return true;
+}
+
+/** Lister les favoris d'un acheteur */
+export async function getFavorisAcheteur(acheteurId: string) {
+  const { data, error } = await supabase
+    .from('favoris')
+    .select('*, produit:produits(*)')
+    .eq('acheteur_id', acheteurId)
+    .order('créé_à', { ascending: false });
+
+  if (error) throw error;
+  return (data || []) as any[];
+}
+
