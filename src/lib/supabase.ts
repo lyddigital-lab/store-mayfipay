@@ -676,3 +676,165 @@ export async function getFavorisAcheteur(acheteurId: string) {
   return (data || []) as any[];
 }
 
+/** ─── Caisse de la plateforme ─────────────────────────── */
+
+/** Solde actuel de la caisse */
+export async function getSoldeCaisse(): Promise<number> {
+  const { data } = await supabase
+    .from('caisse')
+    .select('solde_disponible')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data?.solde_disponible ?? 0;
+}
+
+/** Caisse réelle : (PawaPay + Moneroo) − (escrows + portefeuilles vendeurs) */
+export async function getCaisseReelle(): Promise<{
+  soldePawapay: number;
+  soldeMoneroo: number;
+  totalEscrows: number;
+  totalPortefeuilles: number;
+  caisseReelle: number;
+}> {
+  // Solde PawaPay
+  const { data: payouts } = await supabase
+    .from('retraits')
+    .select('montant, statut')
+    .eq('statut', 'traite');
+
+  // Solde Moneroo (si table existe, sinon 0)
+  let soldeMoneroo = 0;
+  try {
+    const { data: mono } = await supabase
+      .from('retraits_moneroo')
+      .select('montant')
+      .eq('statut', 'traite')
+      .order('created_at', { ascending: false })
+      .limit(1);
+    soldeMoneroo = mono?.[0]?.montant ?? 0;
+  } catch {
+    soldeMoneroo = 0;
+  }
+
+  // Total escrows (coffre-fort)
+  const { data: escrows } = await supabase
+    .from('commandes')
+    .select('montant_net')
+    .in('statut', ['en_attente_paiement', 'payee', 'en_cours']);
+
+  // Total portefeuilles vendeurs
+  const { data: portefeuilles } = await supabase
+    .from('portefeuilles')
+    .select('solde_disponible');
+
+  const totalEscrows = (escrows || []).reduce((s, c) => s + (c.montant_net || 0), 0);
+  const totalPortefeuilles = (portefeuilles || []).reduce((s, p) => s + (p.solde_disponible || 0), 0);
+  const soldePawapay = (payouts || []).reduce((s, r) => s + (r.montant || 0), 0);
+
+  const caisseReelle = soldePawapay + soldeMoneroo - totalEscrows - totalPortefeuilles;
+
+  return {
+    soldePawapay,
+    soldeMoneroo,
+    totalEscrows,
+    totalPortefeuilles,
+    caisseReelle,
+  };
+}
+
+/** Historique des retraits de caisse */
+export async function getHistoriqueRetraitsCaisse(): Promise<any[]> {
+  const { data, error } = await supabase
+    .from('retraits_caisse')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data || []) as any[];
+}
+
+/** Retrait de caisse (admin uniquement) */
+export async function retraitCaisse(data: {
+  montant: number;
+  adminId: string;
+  adminNom: string;
+  motif: string;
+}) {
+  // 1. Vérifier le solde disponible
+  const soldeCaisse = await getSoldeCaisse();
+  if (soldeCaisse < data.montant) {
+    throw new Error(`Solde insuffisant : ${soldeCaisse} FCFA disponible`);
+  }
+
+  // 2. Vérifier que le retrait ne descend pas sous les escrows + portefeuilles
+  const caisseReelle = await getCaisseReelle();
+  if (caisseReelle.caisseReelle - data.montant < 0) {
+    throw new Error(`Retrait refusé : descendrait sous le solde des escrows + portefeuilles (reste ${caisseReelle.caisseReelle - data.montant} FCFA)`);
+  }
+
+  // 3. Calcul frais PawaPay (1% du montant)
+  const fraisPawapay = Math.round(data.montant * 0.01);
+  const montantNet = data.montant - fraisPawapay;
+
+  // 4. Créer le retrait
+  const { data: retrait, error } = await supabase
+    .from('retraits_caisse')
+    .insert({
+      montant: data.montant,
+      frais_pawapay: fraisPawapay,
+      montant_net: montantNet,
+      motif: data.motif,
+      admin_id: data.adminId,
+      admin_nom: data.adminNom,
+      statut: 'en_attente',
+      created_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  // 5. Débiter la caisse
+  const { error: updateError } = await supabase
+    .from('caisse')
+    .update({
+      solde_disponible: soldeCaisse - data.montant,
+      solde_total_sorties: (await getSoldeCaisseTotaux().sorties || 0) + data.montant,
+      updated_at: new Date().toISOString(),
+    });
+
+  if (updateError) throw updateError;
+
+  return retrait;
+}
+
+/** Totaux de la caisse (entrées/sorties) */
+async function getSoldeCaisseTotaux(): Promise<{ entrees: number; sorties: number }> {
+  const { data } = await supabase
+    .from('caisse')
+    .select('solde_total_entrees, solde_total_sorties')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  return {
+    entrees: data?.solde_total_entrees || 0,
+    sorties: data?.solde_total_sorties || 0,
+  };
+}
+
+/** Initialiser la caisse (une seule fois) */
+export async function initialiserCaisse(montantInitial: number) {
+  const { error } = await supabase
+    .from('caisse')
+    .insert({
+      solde_disponible: montantInitial,
+      solde_total_entrees: montantInitial,
+      solde_total_sorties: 0,
+      created_at: new Date().toISOString(),
+    });
+  if (error) throw error;
+  return true;
+}
+

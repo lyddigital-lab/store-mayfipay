@@ -157,3 +157,25 @@ export interface AcheteurInfo {
   quartier: string;
   produit_id: string;
 }
+
+/** Caisse de la plateforme (argent disponible) */
+export interface Caisse {
+  id: string;
+  solde_disponible: number;
+  solde_total_entrees: number;
+  solde_total_sorties: number;
+  updated_at: string;
+}
+
+/** Retrait de caisse (admin seulement) */
+export interface RetraitCaisse {
+  id: string;
+  montant: number;
+  frais_pawapay: number;
+  montant_net: number;
+  motif: string;
+  admin_id: string;
+  admin_nom: string;
+  created_at: string;
+  statut: 'en_attente' | 'traite' | 'rejete';
+}

@@ -35,7 +35,7 @@ export default function VendeurLivreurs() {
     try {
       await assignerLivreur(boutiqueId, livreurId);
       showSuccess('Livreur assigné', 'Le livreur a été affecté à votre boutique.');
-    } catch (err) { console.error('Erreur:', err); alert('Erreur.'); }
+    } catch (err) { console.error('Erreur:', err); showError('Erreur', 'Impossible d\'assigner le livreur.'); }
     finally { setAssigning(null); }
   }
 

@@ -85,12 +85,12 @@ export default function VendeurProduitForm() {
         setVisibleStore(data.visible_store !== false);
         setProduitId(data.id);
       } else {
-        alert('Produit introuvable.');
+        showError('Produit introuvable', 'Ce produit n\'existe pas.');
         navigate('/vendeur/produits');
       }
     } catch (err) {
       console.error('Erreur chargement:', err);
-      alert('Impossible de charger ce produit.');
+      showError('Impossible de charger ce produit.', 'Veuillez réessayer.');
       navigate('/vendeur/produits');
     } finally {
       setLoadingProduit(false);

@@ -72,10 +72,11 @@ export default function Paiement() {
 
   // Taux de frais buyer : quote prioritaire, sinon regles stockes, dernierement 0.035
   const tauxFraisAcheteur = quote?.taux ?? (reglesCharges ? undefined : 0.035);
+  const tauxFinal = tauxFraisAcheteur ?? 0.035;
   const fraisAcheteur = quote
     ? quote.frais
     : produit
-      ? Math.round((produit.prix + fraisExpedition) * (tauxFraisAcheteur ?? 0.035))
+      ? Math.round((produit.prix + fraisExpedition) * tauxFinal)
       : 0;
   const total = produit ? produit.prix + fraisExpedition + fraisAcheteur : 0;
 

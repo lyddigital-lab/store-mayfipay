@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getVendeurSession, getBoutiqueByVendeur, updateBoutique, getLivreursDisponibles, assignerLivreur } from '../../lib/supabase';
+import { showSuccess, showError } from '../../lib/toast';
 import type { Boutique } from '../../types';
 
 export default function VendeurParametres() {
@@ -36,8 +37,8 @@ export default function VendeurParametres() {
     try {
       await updateBoutique(boutique.id, { ...form, slug: boutique.slug });
       setBoutique({ ...boutique, ...form });
-      alert('Boutique mise à jour !');
-    } catch (err) { console.error('Erreur:', err); alert('Erreur.'); }
+      showSuccess('Boutique mise à jour', 'Vos informations ont été enregistrées.');
+    } catch (err) { console.error('Erreur:', err); showError('Erreur', 'Impossible de mettre à jour la boutique.'); }
     finally { setSaving(false); }
   }
 
