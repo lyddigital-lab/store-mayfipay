@@ -19,12 +19,6 @@ interface ToastContextType {
 export function ToastContainer(): ToastContextType {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  const showToast = useCallback((type: ToastType, title: string, message?: string, duration = 5000) => {
-    const id = Date.now().toString() + Math.random().toString(36).slice(2, 7);
-    setToasts((prev) => [...prev, { id, type, title, message }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), duration);
-  }, []);
-
   const hideToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
@@ -50,32 +44,32 @@ export function ToastContainer(): ToastContextType {
     loading: 'text-mayfipay-orange',
   };
 
-  return {
-    showToast,
-    hideToast,
-    toasts: toasts.map((t, i) => (
-      <div
-        key={t.id}
-        className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl border-l-4 transform transition-all duration-300 translate-y-0 ${bgColors[t.type]}`}
-        style={{ transform: `translateY(${i * 80}px)` }}
-      >
-        <div className="flex items-start gap-3">
-          <div className={`flex-shrink-0 ${textColors[t.type]}`}>{icons[t.type]}</div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-mayfipay-text">{t.title}</p>
-            {t.message && <p className="text-xs text-mayfipay-text-sec mt-0.5">{t.message}</p>}
+  return (
+    <>
+      {toasts.map((t, i) => (
+        <div
+          key={t.id}
+          className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-xl border-l-4 transform transition-all duration-300 translate-y-0 ${bgColors[t.type]}`}
+          style={{ transform: `translateY(${i * 80}px)` }}
+        >
+          <div className="flex items-start gap-3">
+            <div className={`flex-shrink-0 ${textColors[t.type]}`}>{icons[t.type]}</div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-mayfipay-text">{t.title}</p>
+              {t.message && <p className="text-xs text-mayfipay-text-sec mt-0.5">{t.message}</p>}
+            </div>
+            <button
+              onClick={() => hideToast(t.id)}
+              className="ml-2 text-gray-400 hover:text-mayfipay-orange transition-colors"
+            >
+              <span className="sr-only">Fermer</span>
+              <span className="text-xs">✕</span>
+            </button>
           </div>
-          <button
-            onClick={() => hideToast(t.id)}
-            className="ml-2 text-gray-400 hover:text-mayfipay-orange transition-colors"
-          >
-            <span className="sr-only">Fermer</span>
-            <span className="text-xs">✕</span>
-          </button>
         </div>
-      </div>
-    )),
-  };
+      ))}
+    </>
+  );
 }
 
 export function useToast(): ToastContextType {
